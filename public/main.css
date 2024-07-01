@@ -1,1 +1,157 @@
-/* Define styles */
+/* border: #ff0000 2px solid; */
+
+/* Overall */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+:root {
+    --black: #272727;
+    --white: #fafafa;
+
+    --primary: #cfddff;
+    /* --secondary: #000000; */
+    /* --tertiary: #000000; */
+
+    --link: #5b8afe;
+    --link-hover: #2552c4;
+
+    /* --enabled: #5b8afe; */
+    /* --disabled: #151c2f; */
+
+    /* --success: #5def8d; */
+    --warning: #ff5b64;
+}
+
+html {
+    font-family: "Poppins", monospace, sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+    background-color: var(--white);
+    color: var(--black);
+    margin: 0;
+    padding: 0 1em;
+}
+
+a:link,
+a:visited {
+    color: var(--link);
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+button {
+    width: fit-content;
+    cursor: pointer;
+}
+
+.error-message {
+    color: var(--warning);
+}
+
+/* header-nav.ejs */
+.header-nav {
+    background-color: var(--black);
+    color: var(--white);
+    margin: 0 -1em;
+    padding: 0 1em;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.header-nav h1 {
+    width: fit-content;
+    padding: 0 0.5em 0 0;
+}
+
+.header-nav p {
+    width: 25%;
+}
+
+.header-nav nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-section {
+    display: flex;
+    flex-direction: row;
+    margin: 0.5em;
+}
+
+.nav-links a {
+    margin: 0 0 0 3em;
+}
+
+/* author-index.ejs */
+.title-container {
+    display: flex;
+    align-items: baseline;
+}
+
+.title-container p {
+    padding: 0 0 0 0.5em;
+}
+
+.settings-button {
+    padding: 0 0 1em 0;
+}
+
+table {
+    border: 1px solid var(--black);
+    width: 100%;
+    border-spacing: 0;
+    table-layout: fixed;
+    text-align: left;
+    margin: 0 0 4em 0;
+}
+
+th,
+td {
+    padding: 0.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+tr:nth-child(even) {
+    background-color: var(--primary);
+}
+
+/* author-settings.ejs */
+/* author-article-new.ejs */
+form {
+    width: 25%;
+}
+
+form label {
+    font-weight: bold;
+}
+
+form input {
+    width: 100%;
+}
+
+form textarea {
+    width: 50vw;
+    height: 25vh;
+}
+
+form input[type="submit"] {
+    width: fit-content;
+    cursor: pointer;
+}
+
+.form-input-area {
+    padding: 0 0 2em 0;
+}
+
+.form-input-area p {
+    margin: 0;
+}
+
+/* border: #ff0000 2px solid; */

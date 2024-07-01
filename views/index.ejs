@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="/main.css" />
+        <title><%= pageName + tabNameSeparator + appName %></title>
+    </head>
+    <body>
+        <header><%-include("header-nav.ejs") %></header>
+
+        <h1>Welcome to <%= appName %>!</h1>
+        <p>You may access either as a/an...</p>
+        <ul>
+            <li><a href="/author">Author</a></li>
+            <li><a href="/reader">Reader</a></li>
+        </ul>
+
+        <footer><%-include("header-nav.ejs") %></footer>
+    </body>
+</html>
