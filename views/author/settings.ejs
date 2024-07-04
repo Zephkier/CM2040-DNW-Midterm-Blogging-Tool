@@ -12,24 +12,21 @@
         <h1><%= pageName %></h1>
 
         <!-- Form's "action" must match author.js' ".post()" function -->
-        <form method="POST" action="/author/article-new">
+        <!-- <label for> == <input id> helps with accessibility selection -->
+        <!-- <input name> helps with route and .js functionality -->
+        <form method="POST" action="/author/settings">
             <div class="form-input-area">
-                <label for="articleTitle">Title</label>
-                <input id="articleTitle" name="articleTitle" type="text" value="<%= typeof body == 'undefined' ? '' : body.articleTitle %>" />
-                <%formErrors.forEach((error) => { %> <%if (error.path == 'articleTitle') { %>
+                <label for="blogTitle">Blog's title</label>
+                <input id="blogTitle" name="blogTitle" type="text" value="<%= settings.blog_title %>" />
+                <%formErrors.forEach((error) => { %> <%if (error.path == 'blogTitle') { %>
                 <p class="error-message"><%= error.msg %></p>
                 <%} %> <%}); %>
             </div>
 
             <div class="form-input-area">
-                <label for="articleSubtitle">Subtitle (optional)</label>
-                <input id="articleSubtitle" name="articleSubtitle" type="text" type="text" value="<%= typeof body == 'undefined' ? '' : body.articleSubtitle %>" />
-            </div>
-
-            <div class="form-input-area">
-                <label for="articleBody">Body</label>
-                <textarea id="articleBody" name="articleBody"><%= typeof body == 'undefined' ? '' : body.articleBody %></textarea>
-                <%formErrors.forEach((error) => { %> <%if (error.path == 'articleBody') { %>
+                <label for="authorName">Author's name</label>
+                <input id="authorName" name="authorName" type="text" value="<%= settings.author_name %>" />
+                <%formErrors.forEach((error) => { %> <%if (error.path == 'authorName') { %>
                 <p class="error-message"><%= error.msg %></p>
                 <%} %> <%}); %>
             </div>
