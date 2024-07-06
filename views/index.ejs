@@ -7,15 +7,17 @@
         <title><%= pageName + tabNameSeparator + appName %></title>
     </head>
     <body>
-        <header><%-include("header-nav.ejs") %></header>
+        <header><%- include("header-nav.ejs") %></header>
 
-        <h1>Welcome to <%= appName %>!</h1>
-        <p>You may access either as a/an...</p>
-        <ul>
-            <li><a href="/author">Author</a></li>
-            <li><a href="/reader">Reader</a></li>
-        </ul>
+        <main>
+            <h1>Welcome to <%= appName %>!</h1>
+            <p>You may access either as a/an...</p>
+            <ul>
+                <li><a href="/author">Author</a></li>
+                <li><a href="/reader">Reader</a></li>
+            </ul>
+        </main>
 
-        <footer><%-include("header-nav.ejs") %></footer>
+        <footer><%- include("header-nav.ejs") %></footer>
     </body>
 </html>

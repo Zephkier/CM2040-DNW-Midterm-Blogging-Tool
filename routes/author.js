@@ -1,8 +1,8 @@
 // Import and setup modules
 const express = require("express");
 const router = express.Router();
-const { returnStatusCodeAndLog, returnLocalDatetime } = require("../index");
 const { check, validationResult } = require("express-validator");
+const { returnStatusCodeAndLog, returnLocalDatetime, returnNoTags_andShortCharLength } = require("../index");
 
 /**
  * router.get()  : represents browser URL (has "/author" prefix from index.js)
@@ -34,6 +34,8 @@ router.get("/", (req, res, next) => {
                     let allCategoriesOfArticles = [draftArticles, publishedArticles, deletedArticles];
                     allCategoriesOfArticles.forEach((categoryOfArticles) => {
                         categoryOfArticles.forEach((article) => {
+                            // Setup body_plain as it is initially empty
+                            article.body_plain = returnNoTags_andShortCharLength(article.body);
                             // Use <br> and not \n, so EJS can apply line break, and in EJS file, must use <%- %> to apply HTML tags
                             article.date_created = returnLocalDatetime(article.date_created).replace(", ", "<br>");
                             article.date_modified = returnLocalDatetime(article.date_modified).replace(", ", "<br>");
@@ -121,14 +123,15 @@ router.post(
         // When validation is bad
         if (!formErrors.isEmpty()) {
             return res.render("author/article", {
-                pageName: "New Article",
+                pageName: "Create New Article",
                 formInput: req.body, // Pass current page's form inputs to keep it intact
                 formErrors: formErrors.errors, // Pass validation errors, formErrors.errors = [{type, value, msg, path, location}]
             });
         }
         // When validation is good
-        let insertQuery = "INSERT INTO articles (category, title, subtitle, body) VALUES (?, ?, ?, ?)";
-        let paramsFromWebpage = [req.body.thisReturnsValue, req.body.articleTitle, req.body.articleSubtitle, req.body.articleBody];
+        let insertQuery = "INSERT INTO articles (category, title, subtitle, body, body_plain) VALUES (?, ?, ?, ?, ?)";
+        let updatedBodyPlain = returnNoTags_andShortCharLength(req.body.articleBody);
+        let paramsFromWebpage = [req.body.thisReturnsValue, req.body.articleTitle, req.body.articleSubtitle, req.body.articleBody, updatedBodyPlain];
         // Query to update only, nothing is returned
         global.db.run(insertQuery, paramsFromWebpage, (err) => {
             if (err) returnStatusCodeAndLog(res, 500, "A006", err);
@@ -179,14 +182,15 @@ router.post(
                 articleBody: req.body.articleBody,
             };
             return res.render("author/article", {
-                pageName: "Edit Article",
+                pageName: `Edit ${formInputStored.articleCategory} Article`, // Differentiate editing draft or published articles
                 formInput: formInputStored, // Pass current page's form inputs to keep it intact
                 formErrors: formErrors.errors, // Pass validation errors, formErrors.errors = [{type, value, msg, path, location}]
             });
         }
         // When validation is good
-        let updateQuery = "UPDATE articles SET category = ?, title = ?, subtitle = ?, body = ?, date_modified = CURRENT_TIMESTAMP WHERE id = ?";
-        let paramsFromWebpage = [req.body.thisReturnsValue, req.body.articleTitle, req.body.articleSubtitle, req.body.articleBody, chosenId]; // Ensure element's order matches that of query's
+        let updateQuery = "UPDATE articles SET category = ?, title = ?, subtitle = ?, body = ?, body_plain = ?, date_modified = CURRENT_TIMESTAMP WHERE id = ?";
+        let updatedBodyPlain = returnNoTags_andShortCharLength(req.body.articleBody);
+        let paramsFromWebpage = [req.body.thisReturnsValue, req.body.articleTitle, req.body.articleSubtitle, req.body.articleBody, updatedBodyPlain, chosenId]; // Ensure element's order matches that of query's
         // Query to update only, nothing is returned
         global.db.run(updateQuery, paramsFromWebpage, (err) => {
             if (err) returnStatusCodeAndLog(res, 500, "A008", err);

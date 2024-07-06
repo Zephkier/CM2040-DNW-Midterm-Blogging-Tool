@@ -2,116 +2,125 @@
 /* when form error shows up, it moves everything below it downwards */
 /* colour-code buttons */
 
-/* Overall */
+/* Overall/General */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-
 :root {
-    --black: #272727;
-    --white: #fafafa;
+    --background: #1c1c1c;
+    --background-light: #3c3c3c;
 
-    --primary: #cfddff;
-    /* --secondary: #000000; */
-    /* --tertiary: #000000; */
+    --text: #eeeeee;
+    --text-dim: #999999;
 
-    --link: #5b8afe;
-    --link-hover: #2552c4;
+    --primary: #1dc8a0;
+    --primary-shade: #a3e7d7;
+    --secondary: #2a7fcf;
+    --secondary-shade: #abc8e4;
+    --accent: #f0f0f0;
+
+    /* --links: var(--primary); */
+    /* --links-hover: var(--primary-shade); */
 
     /* --enabled: #5b8afe; */
     /* --disabled: #151c2f; */
 
-    /* --success: #5def8d; */
-    --warning: #ff5b64;
+    --success: #82f3a7;
+    --warning: #ff8a90;
 }
-
-html {
+* {
+    /* From Poppins to monospace so that i can see differences clearly */
     font-family: "Poppins", monospace, sans-serif;
-    font-weight: 400;
-    font-style: normal;
 }
-
+/* <body> has <header>, <main>, <footer> */
 body {
-    background-color: var(--white);
-    color: var(--black);
+    background-color: var(--background);
+    color: var(--text);
     margin: 0;
-    padding: 0 1em;
+    padding: 0;
 }
-
+main {
+    padding: 0 5em;
+}
+.main-read-article {
+    padding: 0 25%;
+}
 a:link,
 a:visited {
-    color: var(--link);
+    color: var(--primary);
 }
-
 a:hover {
-    color: var(--link-hover);
+    color: var(--primary-shade);
 }
-
 button {
     width: fit-content;
     cursor: pointer;
 }
-
+footer {
+    margin: 3em 0 0 0;
+}
 .error-message {
     color: var(--warning);
 }
 
 /* header-nav.ejs */
 .header-nav {
-    background-color: var(--black);
-    color: var(--white);
-    margin: 0 -1em;
-    padding: 0 1em;
+    /* Just to be able to differentiate from body */
+    background-color: var(--background-light);
+    color: var(--text);
+    padding: 0 5em;
     display: flex;
     flex-direction: row;
     align-items: center;
 }
-
 .header-nav h1 {
     width: fit-content;
-    padding: 0 0.5em 0 0;
 }
-
 .header-nav p {
     width: 25%;
+    padding: 0 0 0 0.5em;
 }
-
 .header-nav nav {
     display: flex;
     flex-direction: column;
 }
-
 .nav-section {
     display: flex;
     flex-direction: row;
-    margin: 0.5em;
 }
-
-.nav-links a {
+.nav-section a {
     margin: 0 0 0 3em;
 }
 
 /* home.ejs (author) */
-.title-container {
+.blog-info-container {
     display: flex;
     align-items: baseline;
 }
-
-.title-container p {
+.blog-info-container p {
     padding: 0 0 0 0.5em;
 }
-
-.setting-draft-buttons {
-    margin: 0 0 2em 0;
+.categories-of-articles-container h2 {
+    color: var(--primary);
+    margin: 1em 0 0 0;
 }
-
+.no-articles-here {
+    color: var(--text-dim);
+}
 table {
-    border: 1px solid var(--black);
-    margin: 0 0 3em 0;
+    border: 1px solid var(--primary-shade);
     text-align: left;
     border-spacing: 0;
     table-layout: fixed;
     width: 100%;
 }
-
+tr:nth-child(even) {
+    background-color: var(--background-light);
+}
+th {
+    color: var(--primary-shade);
+}
+td {
+    color: var(--text);
+}
 th,
 td {
     padding: 0.5em;
@@ -119,116 +128,203 @@ td {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 table .title,
 table .subtitle {
     width: 15%;
 }
-
 table .views {
     width: 4em;
 }
-
 table .likes {
     width: 3em;
 }
-
 table .date-created,
 table .date-modified {
     width: 8em;
 }
-
 table .actions {
     width: auto;
 }
-
-tr:nth-child(even) {
-    background-color: var(--primary);
-}
-
 td form {
     display: inline;
 }
 
 /* settings.ejs, article.ejs */
-form {
+.settings-form {
     width: 25%;
 }
-
-form label {
+.article-form {
+    width: 50%;
+}
+.form-input-area {
+    padding: 0 0 3em 0;
+}
+.form-input-area label {
+    color: var(--primary);
     font-weight: bold;
 }
-
-form input {
+.form-input-area input {
+    margin: 0.5em 0 0 0;
     width: 100%;
 }
-
-form textarea {
-    width: 50vw;
-    height: 25vh;
+.form-input-area p {
+    margin: 0;
 }
-
 form input[type="submit"] {
     width: fit-content;
     cursor: pointer;
 }
 
-.form-input-area {
-    padding: 0 0 2em 0;
+/* article.ejs' rich text editor */
+.rich-text-editor-container {
+    color: var(--text);
+    /* Not setting width and height as it needs to adjust to its content */
+    display: inline-block;
 }
-
-.form-input-area p {
+.rich-text-editor-container button {
+    margin: 0 0 1em 0;
+    height: 2em;
+    width: 2em;
+    display: grid;
+    place-items: center;
+    border-radius: 3px;
+    border: none;
+    background-color: var(--text);
+    outline: none;
+    color: var(--background);
+}
+.rich-text-editor-options-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0 0.8em;
+    padding: 0.8em 0 0 0;
+}
+/* Hover effect for everything except:
+- .rich-text-editor-options-container <div> itself
+- .active <button> itself
+- .active <button>'s contents
+- .color-picker <input> (the rectangle color picker) */
+.rich-text-editor-options-container *:hover:not(.rich-text-editor-options-container, .active, .active *, .color-picker) {
+    background-color: var(--primary-shade);
+}
+.rich-text-editor-options-container *:active:not(.rich-text-editor-options-container, .active, .active *, .color-picker) {
+    background-color: var(--primary);
+}
+.rich-text-editor-options-container .active {
+    background-color: var(--primary);
+}
+.rich-text-editor-options-container select {
+    background-color: var(--text);
+    border: none;
+    border-radius: 5px;
+    height: 2em;
+    outline: none;
+    cursor: pointer;
+}
+.rich-text-editor-options-container select option {
+    background-color: var(--text);
+    font-size: 1.25em;
+    cursor: pointer;
+}
+.rich-text-editor-color-picker-container {
+    width: 1.5em;
+    height: 1.5em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+.rich-text-editor-color-picker-container .color-picker-label {
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 1;
+}
+.rich-text-editor-color-picker-container .color-picker {
+    border: transparent;
+    background-color: transparent;
+    width: 120%;
+    height: 135%;
     margin: 0;
+    padding: 0;
+    cursor: pointer;
+    position: absolute;
+    top: -0.3em;
+}
+#text-input {
+    background-color: var(--background-light);
+    border: 1px solid var(--background);
+    padding: 0.5em;
+    height: 25vmin;
+    resize: both;
+    overflow: auto;
+    min-width: calc(100% - 3em);
+}
+/* Has a bug that messes up margin/padding when switching from big to small size
+Thus, reset those upon selection */
+#text-input * {
+    margin: 0;
+    padding: 0;
 }
 
 /* home.ejs (reader) */
 .title-container-reader {
     text-align: center;
 }
-
 .title-container-reader p {
-    margin: -1.5em 0 0 0;
+    margin: -1.5em 0 1em 0;
 }
-
 .published-article-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
 }
-
 .published-article {
-    background: var(--primary);
+    background: var(--background-light);
     padding: 2em 2em;
-    margin: 2em;
-    width: calc(50% - 4em);
+    margin: 1em;
+    width: calc(50% - 2em);
     box-sizing: border-box;
 }
-
 .published-article h2 {
+    color: var(--primary);
     margin: 0;
 }
-
 .published-article h3 {
+    color: var(--text-dim);
     margin: 0 0 1em 0;
     font-weight: normal;
 }
-
+.published-article .date-modified {
+    color: var(--text-dim);
+}
 .published-article .body {
     display: inline;
+    /* border: 1px solid yellow; */
+}
+.views-and-likes {
+    display: flex;
+    flex-direction: column;
+    margin: 2em 0 0 0;
+    color: var(--text-dim);
+}
+.views-and-likes p {
+    margin: 0;
 }
 
-.read-more {
-    color: var(--link);
+/* read-article.ejs */
+.read-views-and-likes {
+    margin: 0 0 2em 0;
+    color: var(--text-dim);
 }
-
-.read-more:hover {
-    color: var(--link-hover);
+.read-views-and-likes p {
+    margin: 0;
 }
-
-.views {
-    margin: 0 0 -1em 0;
+.comments-section h2 {
+    color: var(--primary);
 }
-
-.likes {
-    margin: 0 0 -1em 0;
+.one-comment {
+    margin: 0 0 2em 0;
 }

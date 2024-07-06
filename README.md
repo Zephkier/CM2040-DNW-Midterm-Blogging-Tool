@@ -63,3 +63,4 @@ NB. we will ONLY run `npm install`, `npm run build-db`, and `npm run start` . We
 # Notes for whoever is marking
 
 -   "user(s)" is replaced with "reader(s)"
+-   ran `npm install striptags`

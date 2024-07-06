@@ -7,31 +7,31 @@
         <title><%= pageName + tabNameSeparator + appName %></title>
     </head>
     <body>
-        <header><%-include("../header-nav.ejs") %></header>
+        <header><%- include("../header-nav.ejs") %></header>
 
-        <div class="title-container-reader">
-            <h1><%= settings.blog_title %></h1>
-            <p>by <%= settings.author_name %></p>
-        </div>
-
-        <div class="published-article-container">
-            <%publishedArticles.forEach(publishedArticle => { %>
-            <div class="published-article">
-                <h2><%= publishedArticle.title %></h2>
-                <h3><%= publishedArticle.subtitle %></h3>
-                <p><%- publishedArticle.date_modified %></p>
-                <p class="body"><%= publishedArticle.body %></p>
-                <a href="/reader/article/<%= publishedArticle.id %>" class="read-more">Read more</a>
-                <div class="views">
-                    <p>Views: <%= publishedArticle.views %></p>
-                </div>
-                <div class="likes">
-                    <p>Likes: <%= publishedArticle.likes %></p>
-                </div>
+        <main>
+            <div class="title-container-reader">
+                <h1><%= settings.blog_title %></h1>
+                <p>by <%= settings.author_name %></p>
             </div>
-            <%}); %>
-        </div>
 
-        <footer><%-include("../header-nav.ejs") %></footer>
+            <div class="published-article-container">
+                <%publishedArticles.forEach(publishedArticle => { %>
+                <div class="published-article">
+                    <h2><%= publishedArticle.title %></h2>
+                    <h3><%= publishedArticle.subtitle %></h3>
+                    <p class="date-modified"><%= publishedArticle.date_modified %></p>
+                    <p class="body"><%= publishedArticle.body_plain %></p>
+                    <a href="/reader/read-article/<%= publishedArticle.id %>" class="read-more">Read more</a>
+                    <div class="views-and-likes">
+                        <p>Views: <%= publishedArticle.views %></p>
+                        <p>Likes: <%= publishedArticle.likes %></p>
+                    </div>
+                </div>
+                <%}); %>
+            </div>
+        </main>
+
+        <footer><%- include("../header-nav.ejs") %></footer>
     </body>
 </html>

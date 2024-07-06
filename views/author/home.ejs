@@ -7,80 +7,84 @@
         <title><%= pageName + tabNameSeparator + appName %></title>
     </head>
     <body>
-        <header><%-include("../header-nav.ejs") %></header>
+        <header><%- include("../header-nav.ejs") %></header>
 
-        <div class="title-container">
-            <h1><%= settings.blog_title %></h1>
-            <p>by <%= settings.author_name %></p>
-        </div>
+        <main>
+            <div class="blog-info-container">
+                <h1><%= settings.blog_title %></h1>
+                <p>by <%= settings.author_name %></p>
+            </div>
 
-        <div class="setting-draft-buttons">
-            <a href="/author/settings"><button>Settings</button></a>
-        </div>
-
-        <div class="setting-draft-buttons">
             <a href="/author/article"><button>Create new article</button></a>
-        </div>
+            <a href="/author/settings"><button>Settings</button></a>
 
-        <%tableCategories.forEach((tableCategory, index) => { %>
-        <h2><%= tableCategory; %> Articles</h2>
-        <table>
-            <tr>
-                <%tableHeaders.forEach(tableHeader => { %>
-                <th class="<%= tableHeader.toLowerCase().replace(' ', '-') %>"><%= tableHeader %></th>
-                <%}); %>
-            </tr>
+            <div class="categories-of-articles-container">
+                <%tableCategories.forEach((tableCategory, index) => { %>
+                <h2><%= tableCategory; %> Articles</h2>
+                <table>
+                    <tr>
+                        <%tableHeaders.forEach(tableHeader => { %>
+                        <th class="<%= tableHeader.toLowerCase().replace(' ', '-') %>"><%= tableHeader %></th>
+                        <%}); %>
+                    </tr>
 
-            <% allCategoriesOfArticles[index].forEach(categoryOfArticles => { %>
-            <tr>
-                <td class="title"><%= categoryOfArticles.title %></td>
-                <td class="subtitle"><%= categoryOfArticles.subtitle %></td>
-                <td class="views"><%= categoryOfArticles.views %></td>
-                <td class="likes"><%= categoryOfArticles.likes %></td>
-                <td class="date-created"><%- categoryOfArticles.date_created %></td>
-                <td class="date-modified"><%- categoryOfArticles.date_modified %></td>
-                <td class="actions">
-                    <!-- Form's "action" must match author.js' ".post()" function -->
-                    <!-- <input name> helps with route and .js functionality -->
-                    <%if (tableCategory == "Draft") { %>
-                    <a href="/author/article/<%= categoryOfArticles.id %>"><button>Edit</button></a>
-                    <form method="POST" action="/author/publish">
-                        <button type="submit">Publish</button>
-                        <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                    </form>
-                    <form method="POST" action="/author/delete">
-                        <button type="submit">Delete</button>
-                        <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                    </form>
+                    <%if (allCategoriesOfArticles[index].length == 0) { %>
+                    <tr>
+                        <td colspan="<%= tableHeaders.length; %>" class="no-articles-here"><i>No articles here!</i></td>
+                    </tr>
+                    <%} else { allCategoriesOfArticles[index].forEach(categoryOfArticles => { %>
+                    <tr>
+                        <td class="title"><%= categoryOfArticles.title %></td>
+                        <td class="subtitle"><%= categoryOfArticles.subtitle %></td>
+                        <td class="views"><%= categoryOfArticles.views %></td>
+                        <td class="likes"><%= categoryOfArticles.likes %></td>
+                        <td class="date-created"><%- categoryOfArticles.date_created %></td>
+                        <td class="date-modified"><%- categoryOfArticles.date_modified %></td>
+                        <td class="actions">
+                            <!-- Form's "action" must match author.js' ".post()" function -->
+                            <!-- <input name> helps with route and .js functionality -->
+                            <%if (tableCategory == "Draft") { %>
+                            <a href="/author/article/<%= categoryOfArticles.id %>"><button>Edit</button></a>
+                            <form method="POST" action="/author/publish">
+                                <button type="submit">Publish</button>
+                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
+                            </form>
+                            <form method="POST" action="/author/delete">
+                                <button type="submit">Delete</button>
+                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
+                            </form>
 
-                    <%} else if (tableCategory == "Published") { %>
-                    <a href="/author/article/<%= categoryOfArticles.id %>"><button>Edit</button></a>
-                    <form method="POST" action="/author/unpublish">
-                        <button type="submit">Unpublish</button>
-                        <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                    </form>
-                    <form method="POST" action="/author/delete">
-                        <button type="submit">Delete</button>
-                        <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                    </form>
+                            <%} else if (tableCategory == "Published") { %>
+                            <a href="/author/article/<%= categoryOfArticles.id %>"><button>Edit</button></a>
+                            <form method="POST" action="/author/unpublish">
+                                <button type="submit">Unpublish</button>
+                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
+                            </form>
+                            <form method="POST" action="/author/delete">
+                                <button type="submit">Delete</button>
+                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
+                            </form>
 
-                    <%} else if (tableCategory == "Deleted") { %>
-                    <form method="POST" action="/author/recover">
-                        <button type="submit">Recover (to Draft)</button>
-                        <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                    </form>
-                    <form method="POST" action="/author/delete-permanently" class="delete-permanently-form" article-to-delete-permanently="<%= categoryOfArticles.title %>">
-                        <button type="submit">Delete Permamnently</button>
-                        <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                    </form>
+                            <%} else if (tableCategory == "Deleted") { %>
+                            <form method="POST" action="/author/recover">
+                                <button type="submit">Recover (to Draft)</button>
+                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
+                            </form>
+                            <form method="POST" action="/author/delete-permanently" class="delete-permanently-form" article-to-delete-permanently="<%= categoryOfArticles.title %>">
+                                <button type="submit">Delete Permamnently</button>
+                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
+                            </form>
+                            <%} %>
+                        </td>
+                        <%}); %>
+                    </tr>
                     <%} %>
-                </td>
-            </tr>
-            <%}); %>
-        </table>
-        <%}); %>
+                </table>
+                <%}); %>
+            </div>
+        </main>
 
-        <footer><%-include("../header-nav.ejs") %></footer>
+        <footer><%- include("../header-nav.ejs") %></footer>
 
         <script>
             document.querySelectorAll(".delete-permanently-form").forEach((form) => {

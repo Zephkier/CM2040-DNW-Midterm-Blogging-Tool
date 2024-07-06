@@ -10,6 +10,7 @@ app.use(express.static(__dirname + "/public")); // Set location of static files
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" })); // Set Body-parser middleware
+const striptags = require("striptags"); // Taken inspo from Blogger
 
 const sqlite3 = require("sqlite3").verbose();
 const dbFile = "database.db";
@@ -47,10 +48,28 @@ function returnLocalDatetime(datetimeFromDb) {
     return new Date(datetimeFromDb + "Z").toLocaleString();
 }
 
+/**
+ * Remove HTML tags from chunk of string, and keep first 300 characters only - this is mainly for home (reader) page.
+ *
+ * Further edits can be done here to allow some tags!
+ *
+ * Taken inspo from Blogger:
+ * - At home (reader) page: display without HTML tags and formatting whatsoever.
+ * - Expand into specific article: display with HTML tags and formatting present.
+ *
+ * @param {string} stringWithTags String (mainly article's body) that contains HTML tags.
+ * @param {number} charLength Character length to limit; affects home (reader) page.
+ * @returns The same string without any HTML tags.
+ */
+function returnNoTags_andShortCharLength(stringWithTags) {
+    return striptags(stringWithTags).substring(0, 300) + "...";
+}
+
 // Export a module containing the following so external files can access it
 module.exports = {
     returnStatusCodeAndLog,
     returnLocalDatetime,
+    returnNoTags_andShortCharLength,
 };
 
 /**
