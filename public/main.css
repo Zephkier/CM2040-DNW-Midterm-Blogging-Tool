@@ -1,112 +1,182 @@
-/* TODO */
-/* when form error shows up, it moves everything below it downwards */
-/* colour-code buttons */
-
-/* Overall/General */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
 :root {
     --background: #1c1c1c;
     --background-light: #3c3c3c;
 
-    --text: #eeeeee;
     --text-dim: #999999;
+    --text: #eeeeee;
 
+    --primary-dim: #138d70;
     --primary: #1dc8a0;
-    --primary-shade: #a3e7d7;
-    --secondary: #2a7fcf;
-    --secondary-shade: #abc8e4;
-    --accent: #f0f0f0;
+    --primary-light: #a3e7d7;
+    /* --secondary: #2a7fcf; */
+    /* --secondary-light: #abc8e4; */
+    /* --accent: #f0f0f0; */
 
     /* --links: var(--primary); */
-    /* --links-hover: var(--primary-shade); */
+    /* --links-hover: var(--primary-light); */
 
     /* --enabled: #5b8afe; */
     /* --disabled: #151c2f; */
 
-    --success: #82f3a7;
-    --warning: #ff8a90;
+    --alert-dim: #a09e46;
+    --alert: #eceb83;
+    --warning-dim: #a74d4d;
+    --warning: #ff8080;
 }
-* {
+
+/* General */
+html {
     /* From Poppins to monospace so that i can see differences clearly */
     font-family: "Poppins", monospace, sans-serif;
 }
-/* <body> has <header>, <main>, <footer> */
 body {
+    /* <body> has <header>, <main>, <footer> */
     background-color: var(--background);
     color: var(--text);
     margin: 0;
     padding: 0;
 }
 main {
-    padding: 0 5em;
+    margin: 0 10vw;
 }
 .main-read-article {
-    padding: 0 25%;
+    padding: 0 25vw;
+}
+.text-dim {
+    color: var(--text-dim);
+}
+
+/* header-nav.ejs and footer.ejs */
+.header-nav {
+    background-color: var(--background-light);
+    color: var(--text);
+    padding: 0 10vw;
+    display: flex;
+    align-items: center;
+}
+.h1-and-something {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+.h1-and-something .that-something-is-page-name {
+    width: 15em;
+}
+.nav-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+.nav-text,
+.nav-links a {
+    padding: 0 1em 0 0;
 }
 a:link,
 a:visited {
     color: var(--primary);
 }
 a:hover {
-    color: var(--primary-shade);
+    color: var(--primary-light);
 }
-button {
-    width: fit-content;
+.aesthetic-a-tag {
+    text-decoration: none;
+}
+footer:not(.footer-with-no-margin) {
+    margin: 2.5em 0 0 0;
+}
+
+/* index.ejs */
+.form-width-25 {
+    width: 25em;
+}
+.form-width-50 {
+    width: 50em;
+}
+.form-input-area {
+    padding: 0 0 2.5em 0;
+}
+.form-input-area label {
+    color: var(--primary);
+    font-weight: bold;
+}
+.form-input-area input:not(input[type="submit"]) {
+    margin: 0.5em 0 0 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+.form-input-area p {
+    margin: 0;
+}
+button,
+input[type="submit"] {
+    color: var(--background);
     cursor: pointer;
 }
-footer {
-    margin: 3em 0 0 0;
+.btn {
+    padding: 0.5em 1em;
+    margin: 0 1em 2em 0;
+}
+.btn-small {
+    padding: 0.25em 0.75em;
+}
+.btn-long {
+    width: 50%;
+}
+.btn-normal {
+    background-color: var(--text);
+}
+.btn-normal:hover {
+    background-color: var(--text-dim);
+}
+.btn-primary {
+    background-color: var(--primary);
+}
+.btn-primary:hover {
+    background-color: var(--primary-dim);
+}
+.btn-alert {
+    background-color: var(--alert);
+}
+.btn-alert:hover {
+    background-color: var(--alert-dim);
+}
+.btn-warning {
+    background-color: var(--warning);
+}
+.btn-warning:hover {
+    background-color: var(--warning-dim);
+}
+.h1-and-something .that-something-is-display-name {
+    color: var(--primary);
+}
+.h1-and-something .and-something-more {
+    margin: 0 0 0 -0.25em;
 }
 .error-message {
+    position: absolute;
     color: var(--warning);
 }
 
-/* header-nav.ejs */
-.header-nav {
-    /* Just to be able to differentiate from body */
-    background-color: var(--background-light);
-    color: var(--text);
-    padding: 0 5em;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-.header-nav h1 {
-    width: fit-content;
-}
-.header-nav p {
-    width: 25%;
-    padding: 0 0 0 0.5em;
-}
-.header-nav nav {
-    display: flex;
-    flex-direction: column;
-}
-.nav-section {
-    display: flex;
-    flex-direction: row;
-}
-.nav-section a {
-    margin: 0 0 0 3em;
-}
-
 /* home.ejs (author) */
-.blog-info-container {
+.blog-info {
     display: flex;
     align-items: baseline;
+    gap: 0.5em;
 }
-.blog-info-container p {
-    padding: 0 0 0 0.5em;
+.categories-of-articles-container {
+    min-width: 900px;
 }
 .categories-of-articles-container h2 {
     color: var(--primary);
-    margin: 1em 0 0 0;
+    margin: 0;
+    padding: 0;
 }
-.no-articles-here {
-    color: var(--text-dim);
+.categories-of-articles-container table:not(:last-child) {
+    margin: 0 0 2em 0;
 }
 table {
-    border: 1px solid var(--primary-shade);
+    border: 1px solid var(--primary-light);
     text-align: left;
     border-spacing: 0;
     table-layout: fixed;
@@ -116,10 +186,13 @@ tr:nth-child(even) {
     background-color: var(--background-light);
 }
 th {
-    color: var(--primary-shade);
+    color: var(--primary-light);
 }
 td {
     color: var(--text);
+}
+td.subtitle {
+    color: var(--text-dim);
 }
 th,
 td {
@@ -130,49 +203,21 @@ td {
 }
 table .title,
 table .subtitle {
-    width: 15%;
+    width: 20%;
 }
-table .views {
-    width: 4em;
-}
+table .views,
 table .likes {
-    width: 3em;
+    width: 4em;
+    text-align: center;
 }
 table .date-created,
 table .date-modified {
     width: 8em;
 }
-table .actions {
-    width: auto;
-}
-td form {
-    display: inline;
-}
-
-/* settings.ejs, article.ejs */
-.settings-form {
-    width: 25%;
-}
-.article-form {
-    width: 50%;
-}
-.form-input-area {
-    padding: 0 0 3em 0;
-}
-.form-input-area label {
-    color: var(--primary);
-    font-weight: bold;
-}
-.form-input-area input {
-    margin: 0.5em 0 0 0;
-    width: 100%;
-}
-.form-input-area p {
-    margin: 0;
-}
-form input[type="submit"] {
-    width: fit-content;
-    cursor: pointer;
+table .actions-row-of-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
 }
 
 /* article.ejs' rich text editor */
@@ -187,7 +232,7 @@ form input[type="submit"] {
     width: 2em;
     display: grid;
     place-items: center;
-    border-radius: 3px;
+    border-radius: 5px;
     border: none;
     background-color: var(--text);
     outline: none;
@@ -200,15 +245,24 @@ form input[type="submit"] {
     gap: 0 0.8em;
     padding: 0.8em 0 0 0;
 }
-/* Hover effect for everything except:
-- .rich-text-editor-options-container <div> itself
-- .active <button> itself
-- .active <button>'s contents
-- .color-picker <input> (the rectangle color picker) */
-.rich-text-editor-options-container *:hover:not(.rich-text-editor-options-container, .active, .active *, .color-picker) {
-    background-color: var(--primary-shade);
+/* Hover effect for everything except some items */
+.rich-text-editor-options-container *:hover:not(
+    /* Format */
+    .rich-text-editor-options-container,
+    .active,
+    .active *,
+    .rich-text-editor-color-picker-container,
+    .rich-text-editor-color-picker-container *) {
+    background-color: var(--primary-light);
+    border-radius: 5px;
 }
-.rich-text-editor-options-container *:active:not(.rich-text-editor-options-container, .active, .active *, .color-picker) {
+.rich-text-editor-options-container *:active:not(
+    /* Format */
+    .rich-text-editor-options-container,
+    .active,
+    .active *,
+    .rich-text-editor-color-picker-container,
+    .rich-text-editor-color-picker-container *) {
     background-color: var(--primary);
 }
 .rich-text-editor-options-container .active {
@@ -228,8 +282,9 @@ form input[type="submit"] {
     cursor: pointer;
 }
 .rich-text-editor-color-picker-container {
-    width: 1.5em;
-    height: 1.5em;
+    width: 1.6em;
+    height: 1.6em;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -241,17 +296,26 @@ form input[type="submit"] {
     height: 100%;
     cursor: pointer;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .rich-text-editor-color-picker-container .color-picker {
     border: transparent;
     background-color: transparent;
     width: 120%;
-    height: 135%;
+    height: 140%;
     margin: 0;
     padding: 0;
     cursor: pointer;
     position: absolute;
-    top: -0.3em;
+    top: -0.85em;
+}
+input[type="color"]::-webkit-color-swatch {
+    border-radius: 5px;
+}
+input[type="color"]::-moz-color-swatch {
+    border-radius: 5px;
 }
 #text-input {
     background-color: var(--background-light);
@@ -260,7 +324,7 @@ form input[type="submit"] {
     height: 25vmin;
     resize: both;
     overflow: auto;
-    min-width: calc(100% - 3em);
+    min-width: calc(570px - 1em);
 }
 /* Has a bug that messes up margin/padding when switching from big to small size
 Thus, reset those upon selection */
@@ -268,7 +332,6 @@ Thus, reset those upon selection */
     margin: 0;
     padding: 0;
 }
-
 /* home.ejs (reader) */
 .title-container-reader {
     text-align: center;
@@ -302,7 +365,6 @@ Thus, reset those upon selection */
 }
 .published-article .body {
     display: inline;
-    /* border: 1px solid yellow; */
 }
 .views-and-likes {
     display: flex;

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="/main.css" />
+        <title><%= pageName + tabNameSeparator + appName %></title>
+    </head>
+    <body>
+        <header><%- include("./partials/header-nav.ejs") %></header>
+
+        <main>
+            <h1><%= pageName %></h1>
+
+            <!-- Form's "action" must match author.js' ".post()" function -->
+            <!-- <label for> == <input id> helps with accessibility selection -->
+            <!-- <input name> helps with route and .js functionality -->
+            <form class="form-width-25" method="POST" action="/sign-up">
+                <div class="form-input-area">
+                    <label for="createUser">Create username</label>
+                    <input id="createUser" name="createUser" type="text" value="<%= formInputStored.createUser %>" />
+                    <%formErrors.forEach((error) => { if (error.path == 'createUser') { %>
+                    <p class="error-message"><%= error.msg %></p>
+                    <%}}) %> <%if (usernameError) { %>
+                    <p class="error-message"><%= usernameError %></p>
+                    <%} %>
+                </div>
+                <div class="form-input-area">
+                    <label for="createPass">Create password</label>
+                    <input id="createPass" name="createPass" type="text" value="<%= formInputStored.createPass %>" />
+                    <%formErrors.forEach((error) => { if (error.path == 'createPass') { %>
+                    <p class="error-message"><%= error.msg %></p>
+                    <%}}) %>
+                </div>
+                <div class="form-input-area">
+                    <label for="createDisplayName">Create display name (can be changed later)</label>
+                    <input id="createDisplayName" name="createDisplayName" type="text" value="<%= formInputStored.createDisplayName %>" />
+                    <%formErrors.forEach((error) => { if (error.path == 'createDisplayName') { %>
+                    <p class="error-message"><%= error.msg %></p>
+                    <%}}) %>
+                </div>
+                <div class="form-input-area">
+                    <input class="btn btn-long btn-primary" type="submit" value="Sign up" />
+                </div>
+            </form>
+            <p>Back to <a href="/">login</a></p>
+        </main>
+
+        <footer><%- include("./partials/footer.ejs") %></footer>
+    </body>
+</html>

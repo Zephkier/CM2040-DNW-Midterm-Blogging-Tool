@@ -7,17 +7,51 @@
         <title><%= pageName + tabNameSeparator + appName %></title>
     </head>
     <body>
-        <header><%- include("header-nav.ejs") %></header>
+        <header><%- include("./partials/header-nav.ejs") %></header>
 
         <main>
+            <%if (!user) { %>
             <h1>Welcome to <%= appName %>!</h1>
-            <p>You may access either as a/an...</p>
-            <ul>
-                <li><a href="/author">Author</a></li>
-                <li><a href="/reader">Reader</a></li>
-            </ul>
+            <!-- Form's "action" must match author.js' ".post()" function -->
+            <!-- <label for> == <input id> helps with accessibility selection -->
+            <!-- <input name> helps with route and .js functionality -->
+            <form class="form-width-25" method="POST" action="/">
+                <div class="form-input-area">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text" value="<%= formInputStored.username %>" />
+                    <%formErrors.forEach((error) => { if (error.path == 'username') { %>
+                    <p class="error-message"><%= error.msg %></p>
+                    <%}}) %>
+                </div>
+                <div class="form-input-area">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="text" value="<%= formInputStored.password %>" />
+                    <%formErrors.forEach((error) => { if (error.path == 'password') { %>
+                    <p class="error-message"><%= error.msg %></p>
+                    <%}}) %>
+                </div>
+                <div class="form-input-area">
+                    <input class="btn btn-long btn-primary" type="submit" value="Login" />
+                    <% if (loginError) { %>
+                    <p class="error-message"><%= loginError %></p>
+                    <% } %>
+                </div>
+            </form>
+            <p>Don't have an account? <a href="/sign-up">Sign up</a> or <a href="/reader/read-article">view as guest</a></p>
+            <%} else { %>
+            <div class="h1-and-something">
+                <h1>Welcome,</h1>
+                <h1 class="that-something-is-display-name"><%= user.display_name %></h1>
+                <h1 class="and-something-more">!</h1>
+            </div>
+            <p>You may now access the navigation bar above.</p>
+            <%} %>
         </main>
 
-        <footer><%- include("header-nav.ejs") %></footer>
+        <%if (!user) { %>
+        <footer><%- include("./partials/footer.ejs") %></footer>
+        <%} else { %>
+        <footer class="footer-with-no-margin"><%- include("./partials/footer.ejs") %></footer>
+        <%}%>
     </body>
 </html>

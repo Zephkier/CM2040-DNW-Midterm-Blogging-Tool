@@ -67,39 +67,6 @@ const modifyText = (command, defaultUi, value) => {
     document.execCommand(command, defaultUi, value);
 };
 
-// Setup button highlights, fonts, font size
-const setup = () => {
-    // No highlight for list/(un)link/lists/un-redo as they are one-time operations
-    highlightSet(formatButtons, false);
-    highlightSet(scriptButtons, true);
-    highlightSet(alignButtons, true);
-    highlightSet(spacingButtons, true);
-    // Fonts
-    fonts.map((value) => {
-        let option = document.createElement("option");
-        option.value = value;
-        option.innerHTML = value;
-        // Rename option but in HTML's display only
-        if (option.value == "Poppins") option.innerHTML = "Poppins (default)";
-        if (option.value == "cursive") option.innerHTML = "Comic Sans MS";
-        // Add spaces for readability
-        option.innerHTML = "&nbsp;&nbsp;" + option.innerHTML + "&nbsp;&nbsp;";
-        fontName.appendChild(option);
-    });
-    // Font size (limit is 7)
-    for (let i = 1; i <= 7; i++) {
-        let option = document.createElement("option");
-        option.value = i;
-        option.innerHTML = i;
-        // Add spaces for readability
-        option.innerHTML = "&nbsp;&nbsp;" + option.innerHTML + "&nbsp;&nbsp;";
-        fontSizeRef.appendChild(option);
-    }
-    fontSizeRef.value = 3; // Default font size
-};
-
-setup();
-
 // optionsButtons = no value
 optionsButtons.forEach((button) => {
     button.addEventListener("click", (event) => {
@@ -129,3 +96,36 @@ linkButton.addEventListener("click", (event) => {
         modifyText(linkButton.id, false, userLink);
     }
 });
+
+// Setup button highlights, fonts, font size
+const setup = () => {
+    // No highlight for list/(un)link/lists/un-redo as they are one-time operations
+    highlightSet(formatButtons, false);
+    highlightSet(scriptButtons, true);
+    highlightSet(alignButtons, true);
+    highlightSet(spacingButtons, true);
+    // Fonts
+    fonts.map((value) => {
+        let option = document.createElement("option");
+        option.value = value;
+        option.innerHTML = value;
+        // Rename option but in HTML's display only
+        if (option.value == "Poppins") option.innerHTML = "Poppins (default)";
+        if (option.value == "cursive") option.innerHTML = "Comic Sans MS";
+        // Add spaces for readability
+        option.innerHTML = "&nbsp;" + option.innerHTML + "&nbsp;&nbsp;&nbsp;";
+        fontName.appendChild(option);
+    });
+    // Font size (limit is 7)
+    for (let i = 1; i <= 7; i++) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.innerHTML = i;
+        // Add spaces for readability
+        option.innerHTML = "&nbsp;" + option.innerHTML + "&nbsp;&nbsp;&nbsp;";
+        fontSizeRef.appendChild(option);
+    }
+    fontSizeRef.value = 3; // Default font size
+};
+
+setup();

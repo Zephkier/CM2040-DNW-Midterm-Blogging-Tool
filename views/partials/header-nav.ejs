@@ -1,0 +1,17 @@
+<div class="header-nav">
+    <div class="h1-and-something">
+        <h1><a href="/" class="aesthetic-a-tag"><%= appName %></a></h1>
+        <p class="that-something-is-page-name">@ <%= pageName %></p>
+    </div>
+    <nav class="nav-container">
+        <%if (user) { %>
+        <div class="nav-links">
+            <a href="/logout" class="aesthetic-a-tag"><u>Logout</u></a>
+            <a href="/author/" class="aesthetic-a-tag"><u>Home</u></a>
+            <a href="/author/article" class="aesthetic-a-tag"><u>Create new article</u></a>
+            <!-- <a href="/author" class="aesthetic-a-tag">Author Home</a> -->
+            <!-- <a href="/reader" class="aesthetic-a-tag">Reader Home</a> -->
+        </div>
+        <%} %>
+    </nav>
+</div>

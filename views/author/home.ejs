@@ -7,84 +7,91 @@
         <title><%= pageName + tabNameSeparator + appName %></title>
     </head>
     <body>
-        <header><%- include("../header-nav.ejs") %></header>
+        <header><%- include("../partials/header-nav.ejs") %></header>
 
         <main>
-            <div class="blog-info-container">
-                <h1><%= settings.blog_title %></h1>
-                <p>by <%= settings.author_name %></p>
+            <div class="blog-info">
+                <h1><%= blog.title %></h1>
+                <p>by <%= blog.display_name %></p>
             </div>
 
-            <a href="/author/article"><button>Create new article</button></a>
-            <a href="/author/settings"><button>Settings</button></a>
+            <a href="/author/article"><button class="btn btn-primary">Create new article</button></a>
+            <a href="/author/settings"><button class="btn btn-normal">Settings</button></a>
 
             <div class="categories-of-articles-container">
-                <%tableCategories.forEach((tableCategory, index) => { %>
-                <h2><%= tableCategory; %> Articles</h2>
+                <%articleCategories.forEach((category, index) => { %>
+                <h2><%= category %> Articles</h2>
                 <table>
+                    <!-- Table header -->
                     <tr>
                         <%tableHeaders.forEach(tableHeader => { %>
                         <th class="<%= tableHeader.toLowerCase().replace(' ', '-') %>"><%= tableHeader %></th>
-                        <%}); %>
+                        <%}) %>
                     </tr>
-
-                    <%if (allCategoriesOfArticles[index].length == 0) { %>
+                    <!-- Table data -->
+                    <%if (allArticles[index].length == 0) { %>
                     <tr>
-                        <td colspan="<%= tableHeaders.length; %>" class="no-articles-here"><i>No articles here!</i></td>
+                        <td colspan="<%= tableHeaders.length %>" class="text-dim"><i>No articles here!</i></td>
                     </tr>
-                    <%} else { allCategoriesOfArticles[index].forEach(categoryOfArticles => { %>
+                    <%} else { allArticles[index].forEach(article => { %>
                     <tr>
-                        <td class="title"><%= categoryOfArticles.title %></td>
-                        <td class="subtitle"><%= categoryOfArticles.subtitle %></td>
-                        <td class="views"><%= categoryOfArticles.views %></td>
-                        <td class="likes"><%= categoryOfArticles.likes %></td>
-                        <td class="date-created"><%- categoryOfArticles.date_created %></td>
-                        <td class="date-modified"><%- categoryOfArticles.date_modified %></td>
+                        <td class="title"><%= article.title %></td>
+                        <td class="subtitle"><%= article.subtitle %></td>
+                        <td class="views"><%= article.views %></td>
+                        <td class="likes"><%= article.likes %></td>
+                        <td class="date-created"><%- article.date_created %></td>
+                        <td class="date-modified"><%- article.date_modified %></td>
                         <td class="actions">
                             <!-- Form's "action" must match author.js' ".post()" function -->
                             <!-- <input name> helps with route and .js functionality -->
-                            <%if (tableCategory == "Draft") { %>
-                            <a href="/author/article/<%= categoryOfArticles.id %>"><button>Edit</button></a>
-                            <form method="POST" action="/author/publish">
-                                <button type="submit">Publish</button>
-                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                            </form>
-                            <form method="POST" action="/author/delete">
-                                <button type="submit">Delete</button>
-                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                            </form>
+                            <%if (category == "Draft") { %>
+                            <div class="actions-row-of-buttons">
+                                <a href="/author/article/<%= article.id %>"><button class="btn-small btn-alert">Edit</button></a>
+                                <form method="POST" action="/author/publish">
+                                    <button class="btn-small btn-primary" type="submit">Publish</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                                <form method="POST" action="/author/delete">
+                                    <button class="btn-small btn-warning" type="submit">Delete</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                            </div>
 
-                            <%} else if (tableCategory == "Published") { %>
-                            <a href="/author/article/<%= categoryOfArticles.id %>"><button>Edit</button></a>
-                            <form method="POST" action="/author/unpublish">
-                                <button type="submit">Unpublish</button>
-                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                            </form>
-                            <form method="POST" action="/author/delete">
-                                <button type="submit">Delete</button>
-                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                            </form>
+                            <%} else if (category == "Published") { %>
+                            <div class="actions-row-of-buttons">
+                                <a href="/author/article/<%= article.id %>"><button class="btn-small btn-alert">Edit</button></a>
+                                <form method="POST" action="/author/unpublish">
+                                    <button class="btn-small btn-primary" type="submit">Unpublish</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                                <form method="POST" action="/author/delete">
+                                    <button class="btn-small btn-warning" type="submit">Delete</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                            </div>
 
-                            <%} else if (tableCategory == "Deleted") { %>
-                            <form method="POST" action="/author/recover">
-                                <button type="submit">Recover (to Draft)</button>
-                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                            </form>
-                            <form method="POST" action="/author/delete-permanently" class="delete-permanently-form" article-to-delete-permanently="<%= categoryOfArticles.title %>">
-                                <button type="submit">Delete Permamnently</button>
-                                <input name="chosenId" type="hidden" value="<%= categoryOfArticles.id %>" />
-                            </form>
+                            <%} else if (category == "Deleted") { %>
+                            <div class="actions-row-of-buttons">
+                                <form method="POST" action="/author/recover">
+                                    <button class="btn-small btn-primary" type="submit">Recover (to Draft)</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                                <form method="POST" action="/author/delete-permanently" class="delete-permanently-form" article-to-delete-permanently="<%= article.title %>">
+                                    <button class="btn-small btn-warning" type="submit">Delete Permamnently</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                            </div>
                             <%} %>
                         </td>
-                        <%}); %>
+                        <%}) %>
                     </tr>
                     <%} %>
                 </table>
-                <%}); %>
+                <%}) %>
             </div>
         </main>
 
-        <footer><%- include("../header-nav.ejs") %></footer>
+        <footer><%- include("../partials/footer.ejs") %></footer>
 
         <script>
             document.querySelectorAll(".delete-permanently-form").forEach((form) => {

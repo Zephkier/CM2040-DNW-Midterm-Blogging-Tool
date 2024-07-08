@@ -7,7 +7,7 @@
         <title><%= pageName + tabNameSeparator + appName %></title>
     </head>
     <body>
-        <header><%- include("../header-nav.ejs") %></header>
+        <header><%- include("../partials/header-nav.ejs") %></header>
 
         <main>
             <h1><%= pageName %></h1>
@@ -15,28 +15,28 @@
             <!-- Form's "action" must match author.js' ".post()" function -->
             <!-- <label for> == <input id> helps with accessibility selection -->
             <!-- <input name> helps with route and .js functionality -->
-            <form method="POST" action="/author/settings" class="settings-form">
+            <form method="POST" action="/author/settings" class="form-width-25">
                 <div class="form-input-area">
                     <label for="blogTitle">Blog title</label>
-                    <input id="blogTitle" name="blogTitle" type="text" value="<%= settings.blog_title %>" />
+                    <input id="blogTitle" name="blogTitle" type="text" value="<%= formInputStored.blogTitle %>" />
                     <%formErrors.forEach((error) => { %> <%if (error.path == 'blogTitle') { %>
                     <p class="error-message"><%= error.msg %></p>
                     <%} %> <%}); %>
                 </div>
 
                 <div class="form-input-area">
-                    <label for="authorName">Display name</label>
-                    <input id="authorName" name="authorName" type="text" value="<%= settings.author_name %>" />
-                    <%formErrors.forEach((error) => { %> <%if (error.path == 'authorName') { %>
+                    <label for="displayName">Display name</label>
+                    <input id="displayName" name="displayName" type="text" value="<%= formInputStored.displayName %>" />
+                    <%formErrors.forEach((error) => { %> <%if (error.path == 'displayName') { %>
                     <p class="error-message"><%= error.msg %></p>
                     <%} %> <%}); %>
                 </div>
 
-                <input type="submit" value="Save" />
-                <a href="/author"><button type="button">Cancel</button></a>
+                <input class="btn btn-primary" type="submit" value="Save" />
+                <a href="/author"><button class="btn btn-normal" type="button">Cancel</button></a>
             </form>
         </main>
 
-        <footer><%- include("../header-nav.ejs") %></footer>
+        <footer><%- include("../partials/footer.ejs") %></footer>
     </body>
 </html>
