@@ -4,11 +4,15 @@
         <p class="friend-page-name">@ <%= pageName %></p>
     </div>
     <%if (user) { %>
-    <div class="header-nav-links">
-        <a href="/logout" class="aesthetic-a-tag">Logout</a>
-        <a href="/author" class="aesthetic-a-tag">Home</a>
-        <a href="/author/article" class="aesthetic-a-tag">Create new article</a>
-        <a href="/reader" class="aesthetic-a-tag">Read</a>
-    </div>
+    <a href="/" class="aesthetic-a-tag">Home</a>
+    <a href="/logout" class="aesthetic-a-tag">Logout</a>
+    <a href="/author" class="aesthetic-a-tag">Articles</a>
+    <a href="/author/settings" class="aesthetic-a-tag">Settings</a>
+    <a href="/author/article" class="aesthetic-a-tag">Create new article</a>
+    <a href="/reader" class="aesthetic-a-tag">Blogs</a>
+    <%} else{ %>
+    <a href="/" class="aesthetic-a-tag">Home (login)</a>
+    <a href="/sign-up" class="aesthetic-a-tag">Sign up</a>
+    <a href="/reader" class="aesthetic-a-tag">Blogs</a>
     <%} %>
 </div>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="/main.css" />
+        <title><%= pageName + tabNameSeparator + appName %></title>
+    </head>
+    <body>
+        <header><%- include("../partials/header-nav.ejs") %></header>
+
+        <main>
+            <div class="reader-title-container-with-back-btn">
+                <a href="/reader"><button class="btn btn-primary">Back to all blogs</button> </a>
+                <div class="reader-title-itself">
+                    <h1><%= blogAndUser.title %></h1>
+                    <p>by <%= blogAndUser.display_name %></p>
+                </div>
+            </div>
+
+            <div class="reader-display-container">
+                <%publishedArticles.forEach(publishedArticle => { %>
+                <a href="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>" class="reader-display-items no-underline">
+                    <h2><%= publishedArticle.title %></h2>
+                    <h3><%= publishedArticle.subtitle %></h3>
+                    <p><%= publishedArticle.date_modified %></p>
+                    <p><%= publishedArticle.body_plain %></p>
+                    <button class="btn-med btn-primary">Read more</button>
+                    <div class="h1-and-friends-column reader-display-views-likes">
+                        <p>Views: <%= publishedArticle.views %></p>
+                        <p>Likes: <%= publishedArticle.likes %></p>
+                    </div>
+                </a>
+                <%}); %>
+            </div>
+        </main>
+
+        <footer><%- include("../partials/footer.ejs") %></footer>
+    </body>
+</html>

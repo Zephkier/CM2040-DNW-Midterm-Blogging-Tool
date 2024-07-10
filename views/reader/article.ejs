@@ -7,11 +7,20 @@
         <title><%= pageName + tabNameSeparator + appName %></title>
     </head>
     <body>
-        <header><%- include("../header-nav.ejs") %></header>
+        <header><%- include("../partials/header-nav.ejs") %></header>
 
         <main class="main-read-article">
+            <div class="reader-title-container-with-back-btn">
+                <a href="/reader/blog/1"><button class="btn btn-primary">Back to all articles</button> </a>
+                <div class="reader-title-itself">
+                    <h1><%= blogInfo.title %></h1>
+                    <p>by <%= blogInfo.display_name %></p>
+                </div>
+            </div>
+
             <div class="title-container-reader">
-                <h1><%= blogTitle.blog_title %></h1>
+                <h1><%= blogInfo.title %></h1>
+                <p>by <%= blogInfo.display_name %></p>
             </div>
 
             <%chosenArticle.forEach(article => { %>
@@ -45,6 +54,6 @@
             </form>
         </main>
 
-        <footer><%- include("../header-nav.ejs") %></footer>
+        <footer><%- include("../partials/footer.ejs") %></footer>
     </body>
 </html>

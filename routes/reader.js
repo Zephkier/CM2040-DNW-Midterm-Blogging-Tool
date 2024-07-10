@@ -1,85 +1,144 @@
 // Import and setup modules
 const express = require("express");
+// const { check, validationResult } = require("express-validator");
 const { db } = require("../utils/db.js");
-const { statusCodeAndError, returnUTCtoLocalDatetime, returnShortenAndStripped } = require("../utils/middleware.js");
+const {
+    // Format
+    errorPage,
+    return_ConversionFromUTC_ToLocalDatetime,
+    return_StrippedAnd_ShortenedString,
+    // if_UserLoggedIn,
+    // if_UserHasABlog,
+    // if_UserHasNoBlog,
+    // if_ArticleBelongsToBlog,
+} = require("../utils/middleware.js");
 
 const router = express.Router();
 
-/**
- * app.get()          : represents browser URL endpoint (has "/author" prefix from index-router.js)
- * response.render()  : represents file to load (starts looking from views dir)
- * response.redirect(): represents browser URL endpoint (no prefix at all)
- *
- * Useful command:
- * console.log(request.session, request.session.id);
- *
- * db.get(): query to get one row of results
- * db.all(): query to get many rows of results
- * db.run(): query to update only (eg. INSERT, UPDATE, DELETE), nothing is returned
- */
+// Home (reader), view all blogs and their authors
+router.get("/", (request, response) => {
+    let queryForAllBlogsAndUsers = `
+        SELECT
+            blogs.id, blogs.title,
+            users.display_name,
+            COUNT(articles.id) as article_count
+        FROM blogs JOIN users
+        ON blogs.user_id = users.id
+        LEFT JOIN articles
+        ON blogs.id = articles.blog_id AND articles.category = 'published'
+        GROUP BY blogs.id, blogs.title, users.display_name`;
+    db.all(queryForAllBlogsAndUsers, (err, allBlogsAndUsers) => {
+        if (err) return errorPage(response, 500, "R001", err);
+        response.render("reader/home.ejs", {
+            pageName: "Home (reader)",
+            user: request.session.user,
+            allBlogsAndUsers: allBlogsAndUsers,
+            tableHeaders: ["Blog title", "Author", "Actions"],
+        });
+    });
+});
 
-// Home (reader) page
-router.get("/", (req, res) => {
-    let queryForSettings = "SELECT blog_title, author_name FROM settings WHERE id = 1";
-    let queryForPublishedArticles = "SELECT * FROM articles WHERE category = 'published'";
-    // Query to get single row of result
-    db.get(queryForSettings, (err, settings) => {
-        if (err) statusCodeAndError(res, 500, "R001", err);
-        // Query to get multiple rows of result
-        db.all(queryForPublishedArticles, (err, publishedArticles) => {
-            if (err) statusCodeAndError(res, 500, "R002", err);
-            // When all queries are okay
-            publishedArticles.forEach((publishedArticle) => {
-                // Setup body_plain as it is initially empty
-                publishedArticle.body_plain = returnShortenAndStripped(publishedArticle.body);
-                // Convert datetimes from (SQLite3's default) UTC to local
-                publishedArticle.date_created = returnUTCtoLocalDatetime(publishedArticle.date_created);
-                publishedArticle.date_modified = returnUTCtoLocalDatetime(publishedArticle.date_modified);
+// Choose blog to read, no blog chosen by default, so redirect to blog selection
+router.get("/blog", (request, response) => {
+    response.redirect("/reader");
+});
+
+// Choose blog to read, view all of its published articles
+router.get("/blog/:chosenBlogId", (request, response) => {
+    let chosenBlogId = request.params.chosenBlogId;
+    let queryForBlogAndUser = `
+        SELECT *
+        FROM blogs JOIN users
+        ON blogs.user_id = users.id
+        WHERE blogs.id = ?`;
+    db.get(queryForBlogAndUser, [chosenBlogId], (err, blogAndUser) => {
+        if (err) return errorPage(response, 500, "R001", err);
+        // If no blogAndUser (possibly due to URL manip), then redirect back to blog selection
+        if (!blogAndUser) return response.redirect("/reader");
+        let queryForPublishedArticles = `
+            SELECT * FROM articles
+            WHERE blog_id = ? AND category = 'published'`;
+        db.all(queryForPublishedArticles, [chosenBlogId], (err, publishedArticles) => {
+            if (err) return errorPage(response, 500, "R001", err);
+            publishedArticles.forEach((article) => {
+                // Setup body_plain as it is empty initially
+                article.body_plain = return_StrippedAnd_ShortenedString(article.body);
+                // Convert datetimes
+                article.date_created = return_ConversionFromUTC_ToLocalDatetime(article.date_created);
+                article.date_modified = return_ConversionFromUTC_ToLocalDatetime(article.date_modified);
             });
-            // Pass query results to display in webpage
-            res.render("reader/home", {
-                pageName: "Home (reader)",
-                settings: settings,
+            response.render("reader/blog.ejs", {
+                pageName: "Read blog",
+                user: request.session.user,
+                blogAndUser: blogAndUser,
                 publishedArticles: publishedArticles,
             });
         });
     });
 });
 
-// Read article page - no chosen article by default
-router.get("/read-article", (req, res) => {
-    let queryForBlogTitle = "SELECT blog_title FROM settings WHERE id = 1";
-    // Query to get single row of result
-    db.get(queryForBlogTitle, (err, blogTitle) => {
-        if (err) statusCodeAndError(res, 500, "R003", err);
-        // When all queries are okay (pass query results to display in webpage)
-        res.render("reader/read-article", {
-            pageName: "Read Article",
-            blogTitle: blogTitle,
-            chosenArticle: [{ title: "No article chosen to read!" }],
-        });
-    });
+// // TEST
+// console.log(publishedArticles);
+// // TEST
+
+// Choose published article to read, no blog and article chosen by default, so redirect to blog selection
+router.get("/blog/:blogId/article", (request, response) => {
+    response.redirect("/blog/:blogId/reader");
 });
 
-// Read article page - upon a chosen article
-router.get("/read-article/:chosenId", (req, res) => {
-    let chosenId = req.params.chosenId; // Get param from URL
-    let queryForBlogTitle = "SELECT blog_title FROM settings WHERE id = 1";
-    let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
-    // Query to get single row of result
-    db.get(queryForBlogTitle, (err, blogTitle) => {
-        if (err) statusCodeAndError(res, 500, "R004", err);
-        // Query to get multiple rows of result
-        db.all(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
-            if (err) statusCodeAndError(res, 500, "R005", err);
-            // When all queries are okay (pass query results to display in webpage)
-            res.render("reader/read-article", {
-                pageName: "Read Article",
-                blogTitle: blogTitle,
-                chosenArticle: chosenArticle,
+// Choose published article to read, view all of its contents
+router.get("/blog/:blogId/article/:chosenId", (request, response) => {
+    let chosenId = request.params.chosenId;
+
+    let queryForBlogInfo = `
+        SELECT *
+        FROM blogs JOIN users
+        ON blogs.user_id = users.id
+        WHERE blogs.id = ?`;
+    db.get(queryForBlogInfo, [chosenId], (err, blogInfo) => {
+        if (err) return errorPage(response, 500, "R001", err);
+        if (!blogInfo) return response.redirect("/reader/blog/:blogId");
+
+        let queryForPublishedArticles = `
+            SELECT * FROM articles
+            WHERE blog_id = ? AND category = 'published'`;
+        db.all(queryForPublishedArticles, [chosenId], (err, publishedArticles) => {
+            if (err) return errorPage(response, 500, "R001", err);
+            publishedArticles.forEach((article) => {
+                // Setup body_plain as it is empty initially
+                article.body_plain = return_StrippedAnd_ShortenedString(article.body);
+                // Convert datetimes
+                article.date_created = return_ConversionFromUTC_ToLocalDatetime(article.date_created);
+                article.date_modified = return_ConversionFromUTC_ToLocalDatetime(article.date_modified);
+            });
+            response.render("reader/blog.ejs", {
+                pageName: "Read blog",
+                user: request.session.user,
+                publishedArticles: publishedArticles,
+                blogInfo: blogInfo,
             });
         });
     });
+
+    // let chosenId = request.params.chosenId;
+    // let queryForBlogInfo = `SELECT * FROM blogs JOIN users ON blogs.user_id = users.id WHERE blogs.id = ?`;
+    // db.get(queryForBlogInfo, [chosenId], (err, blogInfo) => {
+    //     if (err) return errorPage(response, 500, "R001", err);
+    //     let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
+    //     db.all(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
+    //         if (err) errorPage(response, 500, "R005", err);
+    //         response.render("reader/article.ejs", {
+    //             pageName: "Read article",
+    //             user: request.session.user,
+    //             blogInfo: blogInfo,
+    //             chosenArticle: chosenArticle,
+    //         });
+    //     });
+    // });
+});
+
+router.get("/blog/:blogId/article/:chosenId", (request, response) => {
+    response.redirect("/reader");
 });
 
 // Export module containing the following so external files can access it
