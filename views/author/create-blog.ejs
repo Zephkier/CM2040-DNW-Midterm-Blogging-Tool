@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="/main.css" />
+        <title><%= pageName + tabNameSeparator + appName %></title>
+    </head>
+    <body>
+        <header><%- include("../partials/header-nav.ejs") %></header>
+
+        <main>
+            <h1><%= pageName %></h1>
+            <p>You must be new! Let's get you started by creating your blog.</p>
+
+            <!-- Form's "action" must match author.js' ".post()" function -->
+            <!-- <label for> == <input id> helps with accessibility selection -->
+            <!-- <input name> helps with route and .js functionality -->
+            <form method="POST" action="/author/create-blog" class="form-width-25">
+                <div class="form-input-area">
+                    <label for="createBlogTitle">Blog title</label>
+                    <input id="createBlogTitle" name="createBlogTitle" type="text" value="<%= formInputStored.createBlogTitle %>" />
+                    <%formErrors.forEach((error) => { %> <%if (error.path == 'createBlogTitle') { %>
+                    <p class="error-message"><%= error.msg %></p>
+                    <%} %> <%}); %>
+                </div>
+                <input class="btn btn-primary" type="submit" value="Create blog" />
+            </form>
+        </main>
+
+        <footer><%- include("../partials/footer.ejs") %></footer>
+    </body>
+</html>

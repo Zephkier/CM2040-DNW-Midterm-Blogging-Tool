@@ -39,19 +39,19 @@
             </form>
             <p>Don't have an account? <a href="/sign-up">Sign up</a> or <a href="/reader/read-article">view as guest</a></p>
             <%} else { %>
-            <div class="h1-and-something">
+            <div class="h1-and-friends-baseline friend-gap">
                 <h1>Welcome,</h1>
-                <h1 class="that-something-is-display-name"><%= user.display_name %></h1>
-                <h1 class="and-something-more">!</h1>
+                <h1 class="friend-display-name"><%= user.display_name %></h1>
+                <h1 class="friend-exclamation-mark">!</h1>
             </div>
-            <p>You may now access the navigation bar above.</p>
+            <p class="friend-column-no-gap-above">You may now access the navigation bar above.</p>
             <%} %>
         </main>
 
         <%if (!user) { %>
         <footer><%- include("./partials/footer.ejs") %></footer>
         <%} else { %>
-        <footer class="footer-with-no-margin"><%- include("./partials/footer.ejs") %></footer>
+        <footer><%- include("./partials/footer.ejs") %></footer>
         <%}%>
     </body>
 </html>

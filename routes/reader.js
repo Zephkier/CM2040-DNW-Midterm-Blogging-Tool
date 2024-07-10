@@ -6,17 +6,20 @@ const { statusCodeAndError, returnUTCtoLocalDatetime, returnShortenAndStripped }
 const router = express.Router();
 
 /**
- * router.get()  : represents browser URL (has "/reader" prefix from index.js)
- * res.render()  : represents file to load (starts looking from views dir)
- * res.redirect(): represents browser URL to load
+ * app.get()          : represents browser URL endpoint (has "/author" prefix from index-router.js)
+ * response.render()  : represents file to load (starts looking from views dir)
+ * response.redirect(): represents browser URL endpoint (no prefix at all)
  *
- * db.get(): query to get single row of results
- * db.all(): query to get multiple rows of results
+ * Useful command:
+ * console.log(request.session, request.session.id);
+ *
+ * db.get(): query to get one row of results
+ * db.all(): query to get many rows of results
  * db.run(): query to update only (eg. INSERT, UPDATE, DELETE), nothing is returned
  */
 
 // Home (reader) page
-router.get("/", (req, res, next) => {
+router.get("/", (req, res) => {
     let queryForSettings = "SELECT blog_title, author_name FROM settings WHERE id = 1";
     let queryForPublishedArticles = "SELECT * FROM articles WHERE category = 'published'";
     // Query to get single row of result
@@ -44,7 +47,7 @@ router.get("/", (req, res, next) => {
 });
 
 // Read article page - no chosen article by default
-router.get("/read-article", (req, res, next) => {
+router.get("/read-article", (req, res) => {
     let queryForBlogTitle = "SELECT blog_title FROM settings WHERE id = 1";
     // Query to get single row of result
     db.get(queryForBlogTitle, (err, blogTitle) => {
@@ -59,7 +62,7 @@ router.get("/read-article", (req, res, next) => {
 });
 
 // Read article page - upon a chosen article
-router.get("/read-article/:chosenId", (req, res, next) => {
+router.get("/read-article/:chosenId", (req, res) => {
     let chosenId = req.params.chosenId; // Get param from URL
     let queryForBlogTitle = "SELECT blog_title FROM settings WHERE id = 1";
     let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
@@ -79,5 +82,5 @@ router.get("/read-article/:chosenId", (req, res, next) => {
     });
 });
 
-// Export a module containing the following so external files (index.js) can access it
+// Export module containing the following so external files can access it
 module.exports = router;

@@ -137,21 +137,21 @@
                     </div>
                 </div>
 
-                <!-- If "Create new article", then "Save to Draft" and "Publish" -->
-                <%if (pageName == "Create new article") { %>
-                <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Save to Draft</button>
-                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
-                <a href="/author"><button class="btn btn-warning" type="button">Cancel</button></a>
-                <!-- If "Edit draft article", then "Update" and "Publish" -->
-                <%} else if (pageName == "Edit draft article") { %>
-                <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Update Draft</button>
-                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
-                <a href="/author"><button class="btn btn-warning" type="button">Cancel</button></a>
+                <!-- If "Create new article",     then "Save to draft" and "Publish" -->
+                <!-- If "Edit draft article",     then "Update draft"  and "Publish" -->
+                <!-- If "Edit published article", then "Save to draft" and "Update published" -->
 
-                <!-- If "Edit published article", then "Save to Draft" and "Update Published" -->
+                <%if (pageName == "Create new article") { %>
+                <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Save to draft</button>
+                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
+                <a href="/author"><button class="btn btn-warning" type="button">Cancel</button></a>
+                <%} else if (pageName == "Edit draft article") { %>
+                <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Update draft</button>
+                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
+                <a href="/author"><button class="btn btn-warning" type="button">Cancel</button></a>
                 <%} else if (pageName == "Edit published article") { %>
-                <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Save to Draft</button>
-                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Update Publish</button>
+                <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Save to draft</button>
+                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Update publish</button>
                 <a href="/author"><button class="btn btn-warning" type="button">Cancel</button></a>
                 <%} %>
             </form>

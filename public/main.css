@@ -56,21 +56,22 @@ main {
     display: flex;
     align-items: center;
 }
-.h1-and-something {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-}
-.h1-and-something .that-something-is-page-name {
-    width: 15em;
-}
-.nav-container {
+.header-nav-links {
     display: flex;
     flex-wrap: wrap;
+    align-items: baseline;
+    gap: 1em;
 }
-.nav-text,
-.nav-links a {
-    padding: 0 1em 0 0;
+footer {
+    margin: 2.5em 0 0 0;
+}
+.footer,
+.footer a:link,
+.footer a:visited {
+    color: var(--text-dim);
+}
+.footer a:hover {
+    color: var(--text);
 }
 a:link,
 a:visited {
@@ -81,9 +82,38 @@ a:hover {
 }
 .aesthetic-a-tag {
     text-decoration: none;
+    transition: 0.3s ease;
 }
-footer:not(.footer-with-no-margin) {
-    margin: 2.5em 0 0 0;
+.aesthetic-a-tag:hover:not(h1 > a) {
+    font-weight: bolder;
+    font-size: larger;
+}
+.h1-and-friends-column {
+    display: flex;
+    flex-direction: column;
+}
+.h1-and-friends-center {
+    display: flex;
+    align-items: center;
+}
+.h1-and-friends-baseline {
+    display: flex;
+    align-items: baseline;
+}
+.friend-gap {
+    gap: 0.5em;
+}
+.friend-page-name {
+    width: 15em;
+}
+.friend-display-name {
+    color: var(--primary);
+}
+.friend-exclamation-mark {
+    margin: 0 0 0 -0.25em;
+}
+.friend-column-no-gap-above {
+    margin-top: -0.5em;
 }
 
 /* index.ejs */
@@ -112,6 +142,7 @@ button,
 input[type="submit"] {
     color: var(--background);
     cursor: pointer;
+    transition: 0.3s ease;
 }
 .btn {
     padding: 0.5em 1em;
@@ -147,23 +178,12 @@ input[type="submit"] {
 .btn-warning:hover {
     background-color: var(--warning-dim);
 }
-.h1-and-something .that-something-is-display-name {
-    color: var(--primary);
-}
-.h1-and-something .and-something-more {
-    margin: 0 0 0 -0.25em;
-}
 .error-message {
     position: absolute;
     color: var(--warning);
 }
 
 /* home.ejs (author) */
-.blog-info {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5em;
-}
 .categories-of-articles-container {
     min-width: 900px;
 }
@@ -203,7 +223,7 @@ td {
 }
 table .title,
 table .subtitle {
-    width: 20%;
+    margin-right: auto;
 }
 table .views,
 table .likes {
@@ -213,6 +233,10 @@ table .likes {
 table .date-created,
 table .date-modified {
     width: 8em;
+}
+table:last-child {
+    /* This tip is from https://www.youtube.com/watch?v=jlvwSorkdIo */
+    margin-left: auto;
 }
 table .actions-row-of-buttons {
     display: flex;

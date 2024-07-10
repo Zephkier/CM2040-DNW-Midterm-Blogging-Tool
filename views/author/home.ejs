@@ -10,7 +10,7 @@
         <header><%- include("../partials/header-nav.ejs") %></header>
 
         <main>
-            <div class="blog-info">
+            <div class="h1-and-friends-baseline friend-gap">
                 <h1><%= blog.title %></h1>
                 <p>by <%= blog.display_name %></p>
             </div>
@@ -44,44 +44,35 @@
                         <td class="actions">
                             <!-- Form's "action" must match author.js' ".post()" function -->
                             <!-- <input name> helps with route and .js functionality -->
-                            <%if (category == "Draft") { %>
                             <div class="actions-row-of-buttons">
+                                <%if (category == "Deleted") { %>
+                                <form method="POST" action="/author">
+                                    <button class="btn-small btn-primary" type="submit" name="thisReturnsItsValue" value="draft">Recover (to draft)</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                                <form method="POST" action="/author" class="delete-permanently-form" article-title-to-delete-permanently="<%= article.title %>">
+                                    <button class="btn-small btn-warning" type="submit" name="thisReturnsItsValue" value="delete-permanently">Delete permamnently</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                                <%} else { %>
                                 <a href="/author/article/<%= article.id %>"><button class="btn-small btn-alert">Edit</button></a>
-                                <form method="POST" action="/author/publish">
-                                    <button class="btn-small btn-primary" type="submit">Publish</button>
+                                <%if (category == "Draft") { %>
+                                <form method="POST" action="/author">
+                                    <button class="btn-small btn-primary" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
                                     <input name="chosenId" type="hidden" value="<%= article.id %>" />
                                 </form>
-                                <form method="POST" action="/author/delete">
-                                    <button class="btn-small btn-warning" type="submit">Delete</button>
+                                <%} else if (category == "Published") { %>
+                                <form method="POST" action="/author">
+                                    <button class="btn-small btn-primary" type="submit" name="thisReturnsItsValue" value="draft">Unpublish</button>
                                     <input name="chosenId" type="hidden" value="<%= article.id %>" />
                                 </form>
+                                <%} %>
+                                <form method="POST" action="/author">
+                                    <button class="btn-small btn-warning" type="submit" name="thisReturnsItsValue" value="deleted">Delete</button>
+                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
+                                </form>
+                                <%} %>
                             </div>
-
-                            <%} else if (category == "Published") { %>
-                            <div class="actions-row-of-buttons">
-                                <a href="/author/article/<%= article.id %>"><button class="btn-small btn-alert">Edit</button></a>
-                                <form method="POST" action="/author/unpublish">
-                                    <button class="btn-small btn-primary" type="submit">Unpublish</button>
-                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
-                                </form>
-                                <form method="POST" action="/author/delete">
-                                    <button class="btn-small btn-warning" type="submit">Delete</button>
-                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
-                                </form>
-                            </div>
-
-                            <%} else if (category == "Deleted") { %>
-                            <div class="actions-row-of-buttons">
-                                <form method="POST" action="/author/recover">
-                                    <button class="btn-small btn-primary" type="submit">Recover (to Draft)</button>
-                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
-                                </form>
-                                <form method="POST" action="/author/delete-permanently" class="delete-permanently-form" article-to-delete-permanently="<%= article.title %>">
-                                    <button class="btn-small btn-warning" type="submit">Delete Permamnently</button>
-                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
-                                </form>
-                            </div>
-                            <%} %>
                         </td>
                         <%}) %>
                     </tr>
@@ -96,8 +87,8 @@
         <script>
             document.querySelectorAll(".delete-permanently-form").forEach((form) => {
                 form.addEventListener("submit", (event) => {
-                    let articleTitle = form.getAttribute("article-to-delete-permanently");
-                    let confirmation = confirm(`Are you sure you want to delete the following article permanently?\n- ${articleTitle}`);
+                    let articleTitle = form.getAttribute("article-title-to-delete-permanently");
+                    let confirmation = confirm(`Are you sure you want to delete "${articleTitle}" permanently?`);
                     if (!confirmation) event.preventDefault();
                 });
             });

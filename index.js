@@ -44,7 +44,7 @@ app.use((request, response, next) => {
  * db.run(): query to update only (eg. INSERT, UPDATE, DELETE), nothing is returned
  */
 
-// Home (main) and successful login
+// Home (main), login, successful login
 app.get("/", (request, response) => {
     return response.render("index.ejs", {
         pageName: "Home (main)",
@@ -107,6 +107,9 @@ app.post(
 
 // Sign up
 app.get("/sign-up", (request, response) => {
+    // Ensure users cannot access this
+    if (request.session.user) return response.redirect("/");
+
     return response.render("sign-up.ejs", {
         pageName: "Sign up",
         user: request.session.user, // For header-nav.ejs
@@ -175,7 +178,7 @@ app.post(
     }
 );
 
-// Logout to remove session
+// Logout, goes to home (main)
 app.get("/logout", (request, response) => {
     request.session.destroy();
     return response.redirect("/");
