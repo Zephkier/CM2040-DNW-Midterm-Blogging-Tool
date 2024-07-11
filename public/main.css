@@ -49,9 +49,9 @@ a:visited {
 a:hover:not(.reader-display-container *) {
     color: var(--primary-light);
 }
-/* .main-read-article {
-    padding: 0 25vw;
-} */
+strong {
+    color: var(--primary);
+}
 .text-dim {
     color: var(--text-dim);
 }
@@ -78,15 +78,7 @@ footer * {
 }
 .footer-row-of-links {
     display: flex;
-}
-.footer-row-of-links:first-child {
-    gap: 2.1em;
-}
-.footer-row-of-links:first-child a:last-child {
-    margin: 0 0 0 5.1em;
-}
-.footer-row-of-links:not(:first-child) {
-    gap: 5em;
+    gap: 2em;
 }
 .footer-top,
 .footer-top a:link,
@@ -150,6 +142,9 @@ footer * {
 }
 .friend-column-no-gap-above {
     margin-top: -0.5em;
+}
+.no-margin-top {
+    margin: -1em 0 0 0;
 }
 
 /* index.ejs */
@@ -407,9 +402,8 @@ Thus, reset those upon selection */
     justify-content: space-between;
     position: relative;
 }
-.reader-title-container-with-back-btn a {
+.absolute {
     position: absolute;
-    top: 2.5em;
 }
 .reader-title-itself {
     margin: 0 auto;

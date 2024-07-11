@@ -3,7 +3,7 @@ const striptags = require("striptags");
 const { db } = require("./db");
 
 /**
- * If invalid database query, then do this.
+ * If invalid database query, then display this.
  *
  * @param {object} response Express response object.
  * @param {number} statusCode Status code to send out.
@@ -15,95 +15,84 @@ function errorPage(response, statusCode, crashId, err) {
 }
 
 /**
- * Returns converted datetime.
- *
- * Adds "Z" behind incoming datetime to indicate it is UTC timezone
+ * Convert from UTC datetime to local datetime.
  *
  * @param {string} dbDatetime UTC datetime given by database.
  * @returns String of local datetime in "DD/MM/YYYY, H:MM:SS am/pm" format.
  */
-function return_ConversionFromUTC_ToLocalDatetime(dbDatetime) {
+function returnLocalDatetime(dbDatetime) {
     return new Date(dbDatetime + "Z").toLocaleString();
 }
 
 /**
- * Returns a HTML-tagless and shortened string; mainly for home (reader) page.
+ * Remove HTML tags, limit character length, add "..." behind.
  *
- * Edits can be done here:
- * - Current character limit = 300.
- * - Current allowed HTML tags = none.
+ * - Mainly for home (reader) page.
+ * - Character limit can be changed here (current: 300 limit).
+ * - Allowed HTML tags can be set here (current: none allowed).
  *
- * This is inspired from Blogger as they do not display formatting at home (reader) page.
+ * Inspired from Blogger as they also do not display text formatting at home (reader) page.
  *
- * But displays it when expanded into an article.
+ * They only display it when expanded into an article.
  *
  * @param {string} stringWithTags String containing HTML tags.
- * @returns String without any HTML tags and shorted to custom-set character limit.
+ * @returns String without HTML tags and limited character.
  */
-function return_StrippedAnd_ShortenedString(stringWithTags) {
+function returnShortenPlainText(stringWithTags) {
     let stripped = striptags(stringWithTags);
     if (stripped.length > 300) return stripped.substring(0, 300) + "...";
     return stripped;
 }
 
 /**
- * Ensures non-user (aka. users not logged in) cannot access a page.
+ * - If user is logged in, then proceed.
+ * - If user is not logged in, then they cannot enter page.
  *
- * If user is not logged in, then redirect to home (main).
- *
- * @param {object} request Express request object.
- * @param {object} response Express response object.
- * @param {function} next Express next() function.
- * @returns Redirect non-user to home (main) or call next().
+ * @returns Redirect to login or call next().
  */
-function if_UserLoggedIn(request, response, next) {
-    if (!request.session.user) return response.redirect("/");
+function ensure_UserLoggedIn(request, response, next) {
+    if (!request.session.user) return response.redirect("/login");
     next();
 }
 
 /**
- * Ensures user WITHOUT a blog cannot access a page.
+ * - If user has a blog, then proceed.
+ * - If user has no blog, then they cannot enter page.
  *
- * It queries database for user's blog information like blogs.id, blogs.title.
+ * Creates `blogInfo`, accessed via `request.blogInfo`, which has:
+ * - `.id`
+ * - `.title`
+ * - `.user_id`
+ * - `.display_name`
  *
- * - If user does not have a blog,
- * - And tries to access blog settings or articles (for whatever else),
- * - Then redirect to create a blog.
- *
- * @param {object} request Express request object.
- * @param {object} response Express response object.
- * @param {function} next Express next() function.
- * @returns Redirect user to create a blog or call next().
+ * @returns Redirect to create a blog or call next().
  */
-function if_UserHasABlog(request, response, next) {
-    // TEST if i can just use "SELECT *" instead of specifying whatever bs
+function ensure_UserHasABlog(request, response, next) {
     let queryForBlogInfo = `
-        SELECT blogs.id, blogs.title, users.display_name
+        SELECT blogs.id, blogs.title, blogs.user_id, users.display_name
         FROM blogs JOIN users
         ON blogs.user_id = users.id
         WHERE users.id = ?`;
     db.get(queryForBlogInfo, [request.session.user.id], (err, blogInfo) => {
         if (err) return errorPage(response, 500, "A001", err);
         if (!blogInfo) return response.redirect("/author/create-blog");
-        request.blogInfo = blogInfo; // blogInfo is now accessible in request object
+        request.blogInfo = blogInfo;
         next();
     });
 }
 
 /**
- * Ensures user WITH a blog cannot access a page; mainly for if they try to access "create-blog"
+ * - If user has no blog, then proceed.
+ * - If user has a blog, then they cannot enter page.
  *
- * Does the same thing as if_UserHasABlog(), but with opposite checks.
+ * This is flipped from the other function!
+ * This is for users, who already have a blog, trying to access the "Create a blog" page.
  *
- * @param {object} request Express request object.
- * @param {object} response Express response object.
- * @param {function} next Express next() function.
- * @returns Redirect user to home (author) or call next().
+ * @returns Redirect to home (author) or call next().
  */
-function if_UserHasNoBlog(request, response, next) {
-    // TEST if i can just use "SELECT *" instead of specifying whatever bs
+function ensure_UserHasNoBlog(request, response, next) {
     let queryForBlogInfo = `
-        SELECT blogs.id, blogs.title, users.display_name
+        SELECT blogs.id, blogs.title, blogs.user_id, users.display_name
         FROM blogs JOIN users
         ON blogs.user_id = users.id
         WHERE users.id = ?`;
@@ -115,24 +104,28 @@ function if_UserHasNoBlog(request, response, next) {
 }
 
 /**
- * Ensures user cannot access articles that do not belong to their blog.
+ * - If article belongs to a blog, then proceed.
+ * - If article does not belong to a blog, then cannot access page.
  *
- * It queries database for article's information.
+ * Requires `request.blogInfo`. Thus, must call `ensure_UserHasABlog()` first.
  *
- * - If articles.blog_id != blogs.id, then access not allowed.
- * - If ==, then access allowed.
+ * Creates `chosenArticle`, accessed via `request.chosenArticle`, which has:
+ * - **all properties** within `articles` table
  *
- * @param {object} request Express request object.
- * @param {object} response Express response object.
- * @param {function} next Express next() function to proceed with rest of code file.
- * @returns {void} 403 status code or call next().
+ * @returns Redirect to home (author) or call next().
  */
-function if_ArticleBelongsToBlog(request, response, next) {
+function ensure_ArticleBelongsToBlog(request, response, next) {
     let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
     let chosenId = request.params.chosenId; // Get param from URL
     db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
+        console.log(chosenArticle);
         if (err) return errorPage(response, 500, "A014", err);
-        if (chosenArticle.blog_id != request.blogInfo.id || !chosenArticle) return response.redirect("/author");
+        if (
+            // Format
+            chosenArticle.blog_id != request.blogInfo.id ||
+            !chosenArticle
+        )
+            return response.redirect("/author");
         request.chosenArticle = chosenArticle;
         next();
     });
@@ -141,10 +134,10 @@ function if_ArticleBelongsToBlog(request, response, next) {
 // Export module containing the following so external files can access it
 module.exports = {
     errorPage,
-    return_ConversionFromUTC_ToLocalDatetime,
-    return_StrippedAnd_ShortenedString,
-    if_UserLoggedIn,
-    if_UserHasABlog,
-    if_UserHasNoBlog,
-    if_ArticleBelongsToBlog,
+    returnLocalDatetime,
+    returnShortenPlainText,
+    ensure_UserLoggedIn,
+    ensure_UserHasABlog,
+    ensure_UserHasNoBlog,
+    ensure_ArticleBelongsToBlog,
 };

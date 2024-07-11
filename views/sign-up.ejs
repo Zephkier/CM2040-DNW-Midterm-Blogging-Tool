@@ -12,9 +12,6 @@
         <main>
             <h1><%= pageName %></h1>
 
-            <!-- Form's "action" must match author.js' ".post()" function -->
-            <!-- <label for> == <input id> helps with accessibility selection -->
-            <!-- <input name> helps with route and .js functionality -->
             <form class="form-width-25" method="POST" action="/sign-up">
                 <div class="form-input-area">
                     <label for="createUser">Create username</label>
@@ -43,7 +40,7 @@
                     <input class="btn btn-long btn-primary" type="submit" value="Sign up" />
                 </div>
             </form>
-            <p>Back to <a href="/">login</a></p>
+            <p>Back to <a href="/login">login</a></p>
         </main>
 
         <footer><%- include("./partials/footer.ejs") %></footer>

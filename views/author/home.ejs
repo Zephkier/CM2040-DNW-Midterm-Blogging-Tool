@@ -42,8 +42,6 @@
                         <td class="date-created"><%- article.date_created %></td>
                         <td class="date-modified"><%- article.date_modified %></td>
                         <td class="actions">
-                            <!-- Form's "action" must match author.js' ".post()" function -->
-                            <!-- <input name> helps with route and .js functionality -->
                             <div class="actions-row-of-buttons">
                                 <%if (category == "Deleted") { %>
                                 <form method="POST" action="/author">
@@ -54,18 +52,14 @@
                                     <button class="btn-small btn-warning" type="submit" name="thisReturnsItsValue" value="delete-permanently">Delete permamnently</button>
                                     <input name="chosenId" type="hidden" value="<%= article.id %>" />
                                 </form>
-                                <%} else { %>
+                                <%} else { if (category == "Draft") { %>
                                 <a href="/author/article/<%= article.id %>"><button class="btn-small btn-alert">Edit</button></a>
-                                <%if (category == "Draft") { %>
-                                <form method="POST" action="/author">
+                                <form method="POST" action="/author" class="publish-form" article-to-publish="<%= article.title %>">
                                     <button class="btn-small btn-primary" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
                                     <input name="chosenId" type="hidden" value="<%= article.id %>" />
                                 </form>
                                 <%} else if (category == "Published") { %>
-                                <form method="POST" action="/author">
-                                    <button class="btn-small btn-primary" type="submit" name="thisReturnsItsValue" value="draft">Unpublish</button>
-                                    <input name="chosenId" type="hidden" value="<%= article.id %>" />
-                                </form>
+                                <button class="btn-small btn-primary" type="button" onclick="shareArticle(<%= article.id %>)">Share</button>
                                 <%} %>
                                 <form method="POST" action="/author">
                                     <button class="btn-small btn-warning" type="submit" name="thisReturnsItsValue" value="deleted">Delete</button>
@@ -85,6 +79,13 @@
         <footer><%- include("../partials/footer.ejs") %></footer>
 
         <script>
+            document.querySelectorAll(".publish-form").forEach((form) => {
+                form.addEventListener("submit", (event) => {
+                    let articleTitle = form.getAttribute("article-to-publish");
+                    let confirmation = confirm(`Are you sure you want to publish "${articleTitle}"?`);
+                    if (!confirmation) event.preventDefault();
+                });
+            });
             document.querySelectorAll(".delete-permanently-form").forEach((form) => {
                 form.addEventListener("submit", (event) => {
                     let articleTitle = form.getAttribute("article-title-to-delete-permanently");
@@ -92,6 +93,11 @@
                     if (!confirmation) event.preventDefault();
                 });
             });
+            // Popup for easy copy-paste
+            function shareArticle(articleId) {
+                let url = `${window.location.origin}/reader/blog/${<%= blog.id %>}/article/${articleId}`;
+                prompt("Copy this URL to share the article:", url);
+            }
         </script>
     </body>
 </html>

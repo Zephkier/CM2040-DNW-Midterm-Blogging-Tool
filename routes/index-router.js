@@ -7,24 +7,40 @@ const { errorPage } = require("../utils/middleware.js");
 const router = express.Router();
 
 /**
- * app.get() or router.get(): represents browser URL endpoint
- * response.render()        : represents file to load (starts looking from views dir)
- * response.redirect()      : represents browser URL endpoint (no prefix at all)
+ * Useful notes throughout implementation:
  *
- * Useful commands:
- * console.log(request.session, request.session.id)
- * <a href> does GET requests only
- * <button name> returns its <button value> when clicked
+ * app.get()/router.get() = endpoint with prefix, if any
+ * response.render()      = file name to load (starts looking from views dir)
+ * response.redirect()    = endpoint without prefix
  *
- * db.get(): query to get one row of results
- * db.all(): query to get many rows of results
- * db.run(): query to update only (eg. INSERT, UPDATE, DELETE), nothing is returned
+ * db.get() returns {}    = query to get ONE row of results
+ * db.all() returns [{},] = query to get MANY rows of results
+ * db.run() returns NIL   = query to insert/update/delete only, nothing is returned
+ *
+ * console.log(request.session)
+ *
+ * <* name="someName"> is used as variable name for routing in .js
+ *
+ * <form action="endpointHere"> must match with .js .post("endpointHere") function
+ * <label for="matchingName"> selects <input id="matchingName">, this helps with accessibility
+ *
+ * <button name="whatIsYourName"> returns its <button value="someName">
+ *
+ * <a href=""> only does GET requests
  */
 
-// Home (main), login, successful login
+// Home (main): intro and split into author/reader
 router.get("/", (request, response) => {
     return response.render("index.ejs", {
         pageName: "Home (main)",
+        user: request.session.user, // For header-nav.ejs
+    });
+});
+
+// Login to access as author
+router.get("/login", (request, response) => {
+    return response.render("login.ejs", {
+        pageName: "Login",
         user: request.session.user, // For header-nav.ejs
         formInputStored: {}, // Empty initially
         formErrors: [], // Empty initially
@@ -33,7 +49,7 @@ router.get("/", (request, response) => {
 });
 
 router.post(
-    "/",
+    "/login",
     [
         // check() names are from <input name>
         check("username", "Username cannot have spaces").matches(/^\S*$/, "i"),
@@ -44,8 +60,8 @@ router.post(
         const formErrors = validationResult(request); // Returns {formatter = [<stuff inside>], errors = [<stuff inside>]}
         // If validation is bad, then re-render page with errors
         if (!formErrors.isEmpty()) {
-            return response.render("index.ejs", {
-                pageName: "Home (main)",
+            return response.render("login.ejs", {
+                pageName: "Login",
                 user: request.session.user, // For header-nav.ejs
                 formInputStored: {
                     // Keep current page's form input filled by creating object with same key-value pairs as user
@@ -63,8 +79,8 @@ router.post(
             db.get(queryForExistingUser, params, (err, existingUser) => {
                 if (err) return errorPage(response, 500, "I001", err);
                 if (!existingUser) {
-                    return response.render("index.ejs", {
-                        pageName: "Home (main)",
+                    return response.render("login.ejs", {
+                        pageName: "Login",
                         user: request.session.user, // For header-nav.ejs
                         formInputStored: {
                             // Keep current page's form input filled by creating object with same key-value pairs as user
@@ -76,7 +92,7 @@ router.post(
                     });
                 }
                 request.session.user = existingUser;
-                return response.redirect("/");
+                return response.redirect("/author");
             });
         }
     }
@@ -148,7 +164,7 @@ router.post(
                 db.run(queryToInsertNewUser, params, (err, newUser) => {
                     if (err) return errorPage(response, 500, "I003", err);
                     request.session.user = newUser;
-                    return response.redirect("/");
+                    return response.redirect("/login");
                 });
             });
         }

@@ -5,12 +5,12 @@ const { db } = require("../utils/db.js");
 const {
     // Format
     errorPage,
-    return_ConversionFromUTC_ToLocalDatetime,
-    return_StrippedAnd_ShortenedString,
-    if_UserLoggedIn,
-    if_UserHasABlog,
-    if_UserHasNoBlog,
-    if_ArticleBelongsToBlog,
+    returnLocalDatetime,
+    returnShortenPlainText,
+    ensure_UserLoggedIn,
+    ensure_UserHasABlog,
+    ensure_UserHasNoBlog,
+    ensure_ArticleBelongsToBlog,
 } = require("../utils/middleware.js");
 
 const router = express.Router();
@@ -18,7 +18,7 @@ const router = express.Router();
 // Ensure user is logged in and has a blog to access these pages!
 
 // Home (author), view all articles
-router.get("/", if_UserLoggedIn, if_UserHasABlog, (request, response) => {
+router.get("/", ensure_UserLoggedIn, ensure_UserHasABlog, (request, response) => {
     let queryForArticlesFromBlog = `
             SELECT * FROM articles
             WHERE blog_id = ?
@@ -29,10 +29,10 @@ router.get("/", if_UserLoggedIn, if_UserHasABlog, (request, response) => {
         let allArticles = [[], [], []];
         articlesFromBlog.forEach((article) => {
             // Setup body_plain as it is empty initially
-            article.body_plain = return_StrippedAnd_ShortenedString(article.body);
+            article.body_plain = returnShortenPlainText(article.body);
             // Use <br> so it can be applied in frontend, must use <%- %>
-            article.date_created = return_ConversionFromUTC_ToLocalDatetime(article.date_created).replace().replace(", ", "<br>");
-            article.date_modified = return_ConversionFromUTC_ToLocalDatetime(article.date_modified).replace(", ", "<br>");
+            article.date_created = returnLocalDatetime(article.date_created).replace().replace(", ", "<br>");
+            article.date_modified = returnLocalDatetime(article.date_modified).replace(", ", "<br>");
             // Filter into different categories
             if (article.category == "draft") allArticles[0].push(article);
             else if (article.category == "published") allArticles[1].push(article);
@@ -61,7 +61,7 @@ router.post("/", (request, response) => {
 });
 
 // Create blog (note that this uses HasNoBlog()!)
-router.get("/create-blog", if_UserLoggedIn, if_UserHasNoBlog, (request, response) => {
+router.get("/create-blog", ensure_UserLoggedIn, ensure_UserHasNoBlog, (request, response) => {
     let queryForBlogInfo = `
         SELECT blogs.id, blogs.title, users.display_name
         FROM blogs JOIN users
@@ -71,7 +71,7 @@ router.get("/create-blog", if_UserLoggedIn, if_UserHasNoBlog, (request, response
         if (err) return errorPage(response, 500, "A003", err);
         if (blogInfo) return response.redirect("/author");
         return response.render("author/create-blog.ejs", {
-            pageName: "Create blog",
+            pageName: "Create a blog",
             user: request.session.user,
             formInputStored: {},
             formErrors: [],
@@ -84,7 +84,7 @@ router.post("/create-blog", [check("createBlogTitle", "Title must have at least 
     // If validation is bad, then re-render page with errors
     if (!formErrors.isEmpty()) {
         return response.render("author/create-blog.ejs", {
-            pageName: "Create blog",
+            pageName: "Create a blog",
             user: request.session.user,
             formInputStored: { createBlogTitle: request.body.createBlogTitle },
             formErrors: formErrors.errors, // Returns [{type, value, msg, path, location}]
@@ -100,7 +100,7 @@ router.post("/create-blog", [check("createBlogTitle", "Title must have at least 
 });
 
 // Settings
-router.get("/settings", if_UserLoggedIn, if_UserHasABlog, (request, response) => {
+router.get("/settings", ensure_UserLoggedIn, ensure_UserHasABlog, (request, response) => {
     return response.render("author/settings.ejs", {
         pageName: "Settings",
         user: request.session.user,
@@ -148,7 +148,7 @@ router.post(
 );
 
 // Article, create new article by default
-router.get("/article", if_UserLoggedIn, if_UserHasABlog, (request, response) => {
+router.get("/article", ensure_UserLoggedIn, ensure_UserHasABlog, (request, response) => {
     return response.render("author/article.ejs", {
         pageName: "Create new article",
         user: request.session.user,
@@ -191,7 +191,7 @@ router.post(
                     request.body.articleTitle,
                     request.body.articleSubtitle,
                     request.body.articleBody,
-                    return_StrippedAnd_ShortenedString(request.body.articleBody), // Get its plain version
+                    returnShortenPlainText(request.body.articleBody), // Get its plain version
                     blogId.id,
                 ];
                 db.run(queryToInsertArticle, params, (err) => {
@@ -204,7 +204,7 @@ router.post(
 );
 
 // Article, edit draft/published article (:chosenId is retrieved upon clicking "Edit" button)
-router.get("/article/:chosenId", if_UserLoggedIn, if_UserHasABlog, if_ArticleBelongsToBlog, (request, response) => {
+router.get("/article/:chosenId", ensure_UserLoggedIn, ensure_UserHasABlog, ensure_ArticleBelongsToBlog, (request, response) => {
     let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
     let chosenId = request.params.chosenId; // Get param from URL
     db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
@@ -269,7 +269,7 @@ router.post(
                     request.body.articleTitle,
                     request.body.articleSubtitle,
                     request.body.articleBody,
-                    return_StrippedAnd_ShortenedString(request.body.articleBody), // Get its plain version
+                    returnShortenPlainText(request.body.articleBody), // Get its plain version
                     blogId.id,
                     request.params.chosenId,
                 ];

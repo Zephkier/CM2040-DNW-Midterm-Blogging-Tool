@@ -5,12 +5,9 @@ const { db } = require("../utils/db.js");
 const {
     // Format
     errorPage,
-    return_ConversionFromUTC_ToLocalDatetime,
-    return_StrippedAnd_ShortenedString,
-    if_UserLoggedIn,
-    // if_UserHasABlog,
-    // if_UserHasNoBlog,
-    // if_ArticleBelongsToBlog,
+    returnLocalDatetime,
+    returnShortenPlainText,
+    ensure_UserLoggedIn,
 } = require("../utils/middleware.js");
 
 const router = express.Router();
@@ -51,23 +48,24 @@ router.get("/blog/:chosenBlogId", (request, response) => {
         ON blogs.user_id = users.id
         WHERE blogs.id = ?`;
     db.get(queryForChosenBlogAndUser, [chosenBlogId], (err, blogAndUser) => {
-        if (err) return errorPage(response, 500, "R001", err);
+        if (err) return errorPage(response, 500, "R002", err);
         // If no blogAndUser (possibly due to URL manip), then redirect back to blog selection
         if (!blogAndUser) return response.redirect("/reader");
         let queryForPublishedArticles = `
             SELECT * FROM articles
-            WHERE blog_id = ? AND category = 'published'`;
+            WHERE blog_id = ? AND category = 'published'
+            ORDER BY articles.date_modified DESC`;
         db.all(queryForPublishedArticles, [chosenBlogId], (err, publishedArticles) => {
-            if (err) return errorPage(response, 500, "R001", err);
+            if (err) return errorPage(response, 500, "R003", err);
             publishedArticles.forEach((article) => {
                 // Setup body_plain as it is empty initially
-                article.body_plain = return_StrippedAnd_ShortenedString(article.body);
+                article.body_plain = returnShortenPlainText(article.body);
                 // Convert datetimes
-                article.date_created = return_ConversionFromUTC_ToLocalDatetime(article.date_created);
-                article.date_modified = return_ConversionFromUTC_ToLocalDatetime(article.date_modified);
+                article.date_created = returnLocalDatetime(article.date_created);
+                article.date_modified = returnLocalDatetime(article.date_modified);
             });
             response.render("reader/blog.ejs", {
-                pageName: "Read blog",
+                pageName: "Select article",
                 user: request.session.user,
                 blogAndUser: blogAndUser,
                 publishedArticles: publishedArticles,
@@ -93,7 +91,7 @@ router.get("/blog/:chosenBlogId/article/:chosenArticleId", (request, response) =
         ON blogs.user_id = users.id
         WHERE blogs.id = ?`;
     db.get(queryForChosenBlogAndUser, [chosenBlogId], (err, blogAndUser) => {
-        if (err) return errorPage(response, 500, "R001", err);
+        if (err) return errorPage(response, 500, "R004", err);
         // If no blogAndUser (possibly due to URL manip), then redirect back to blog selection
         if (!blogAndUser) return response.redirect("/reader/blog/:chosenBlogId");
 
@@ -101,16 +99,32 @@ router.get("/blog/:chosenBlogId/article/:chosenArticleId", (request, response) =
         // This is to prevent a bug where articles.view only updates when in blog.ejs (the page that lists all of blog's published articles)
         let queryToIncrementViewCount = "UPDATE articles SET views = views + 1 WHERE id = ?";
         db.run(queryToIncrementViewCount, [chosenArticleId], (err) => {
-            if (err) return errorPage(response, 500, "R002", err);
+            if (err) return errorPage(response, 500, "R005", err);
 
-            let queryForChosenPublishedArticle = `
-                SELECT * FROM articles
-                WHERE blog_id = ? AND articles.id = ?`;
-            db.get(queryForChosenPublishedArticle, [chosenBlogId, chosenArticleId], (err, publishedArticle) => {
-                if (err) return errorPage(response, 500, "R001", err);
+            let queryForChosenPublishedArticle = null;
+            let params = null;
+            if (userId) {
+                queryForChosenPublishedArticle = `
+                    SELECT *
+                    FROM articles JOIN blogs
+                    ON articles.blog_id = blogs.id
+                    WHERE articles.blog_id = ? AND articles.id = ? AND (articles.category = 'published' OR blogs.user_id = ?)`;
+                params = [chosenBlogId, chosenArticleId, userId];
+            } else {
+                queryForChosenPublishedArticle = `
+                    SELECT articles.*
+                    FROM articles JOIN blogs
+                    ON articles.blog_id = blogs.id
+                    WHERE articles.blog_id = ? AND articles.id = ? AND articles.category = 'published'`;
+                params = [chosenBlogId, chosenArticleId];
+            }
+            db.get(queryForChosenPublishedArticle, params, (err, publishedArticle) => {
+                if (err) return errorPage(response, 500, "R006", err);
+                if (!publishedArticle) return response.redirect("/reader/blog/:chosenBlogId");
+
                 // Convert datetimes
-                publishedArticle.date_created = return_ConversionFromUTC_ToLocalDatetime(publishedArticle.date_created);
-                publishedArticle.date_modified = return_ConversionFromUTC_ToLocalDatetime(publishedArticle.date_modified);
+                publishedArticle.date_created = returnLocalDatetime(publishedArticle.date_created);
+                publishedArticle.date_modified = returnLocalDatetime(publishedArticle.date_modified);
 
                 let queryForComments = `
                     SELECT comments.id, comments.body, comments.date_created, users.display_name
@@ -119,26 +133,26 @@ router.get("/blog/:chosenBlogId/article/:chosenArticleId", (request, response) =
                     WHERE comments.article_id = ?
                     ORDER BY comments.date_created DESC`;
                 db.all(queryForComments, [chosenArticleId], (err, comments) => {
-                    if (err) return errorPage(response, 500, "R001", err);
+                    if (err) return errorPage(response, 500, "R007", err);
 
                     // Convert datetimes
                     comments.forEach((comment) => {
-                        comment.date_created = return_ConversionFromUTC_ToLocalDatetime(comment.date_created);
+                        comment.date_created = returnLocalDatetime(comment.date_created);
                     });
 
                     // Check if the user has liked the article
                     let queryToCheckIfAlreadyLiked = `
                         SELECT * FROM likes WHERE user_id = ? AND article_id = ?`;
                     db.get(queryToCheckIfAlreadyLiked, [userId, chosenArticleId], (err, like) => {
-                        if (err) return errorPage(response, 500, "R003", err);
+                        if (err) return errorPage(response, 500, "R008", err);
 
                         response.render("reader/article.ejs", {
-                            pageName: "Read blog's article",
+                            pageName: "Read article",
                             user: request.session.user,
                             blogAndUser: blogAndUser,
                             publishedArticle: publishedArticle,
                             comments: comments,
-                            hasLiked: !!like, // Check if the user has liked the article
+                            hasLiked: !!like, // Convert to boolean
                         });
                     });
                 });
@@ -148,7 +162,7 @@ router.get("/blog/:chosenBlogId/article/:chosenArticleId", (request, response) =
 });
 
 // Entering comment
-router.post("/blog/:chosenBlogId/article/:chosenArticleId", if_UserLoggedIn, (request, response) => {
+router.post("/blog/:chosenBlogId/article/:chosenArticleId", ensure_UserLoggedIn, (request, response) => {
     let chosenBlogId = request.params.chosenBlogId;
     let chosenArticleId = request.params.chosenArticleId;
 
@@ -157,7 +171,7 @@ router.post("/blog/:chosenBlogId/article/:chosenArticleId", if_UserLoggedIn, (re
     VALUES (?, ?, ?)`;
     let params = [request.session.user.id, chosenArticleId, request.body.enterComment];
     db.run(queryToInsertComment, params, (err) => {
-        if (err) return errorPage(response, 500, "R002", err);
+        if (err) return errorPage(response, 500, "R009", err);
         response.redirect(`/reader/blog/${chosenBlogId}/article/${chosenArticleId}#comments-section`);
     });
 });
@@ -170,7 +184,7 @@ router.get("/blog/:chosenBlogId/article/:chosenArticleId/likes", (request, respo
     ON blogs.user_id = users.id
     WHERE blogs.id = ?`;
     db.get(queryForChosenBlogAndUser, [request.params.chosenBlogId], (err, blogAndUser) => {
-        if (err) return errorPage(response, 500, "R001", err);
+        if (err) return errorPage(response, 500, "R010", err);
         // If no blogAndUser (possibly due to URL manip), then redirect back to blog selection
         if (!blogAndUser) return response.redirect("/reader/blog/:chosenBlogId");
 
@@ -181,25 +195,25 @@ router.get("/blog/:chosenBlogId/article/:chosenArticleId/likes", (request, respo
         WHERE likes.article_id = ?
         ORDER BY likes.date_created DESC`;
         db.all(queryForLikes, [request.params.chosenArticleId], (err, likes) => {
-            if (err) return errorPage(response, 500, "R006", err);
+            if (err) return errorPage(response, 500, "R011", err);
 
             // Convert datetimes
             likes.forEach((like) => {
-                like.date_created = return_ConversionFromUTC_ToLocalDatetime(like.date_created);
+                like.date_created = returnLocalDatetime(like.date_created);
             });
 
-            console.log(likes);
             response.render("reader/likes.ejs", {
                 pageName: "Article Likes",
                 user: request.session.user,
                 blogAndUser: blogAndUser,
                 likes: likes,
+                articleId: request.params.chosenArticleId,
             });
         });
     });
 });
 
-router.post("/blog/:chosenBlogId/article/:chosenArticleId/like", if_UserLoggedIn, (request, response) => {
+router.post("/blog/:chosenBlogId/article/:chosenArticleId/like", ensure_UserLoggedIn, (request, response) => {
     let chosenBlogId = request.params.chosenBlogId;
     let chosenArticleId = request.params.chosenArticleId;
     let userId = request.session.user.id;
@@ -207,26 +221,26 @@ router.post("/blog/:chosenBlogId/article/:chosenArticleId/like", if_UserLoggedIn
     let queryToCheckIfAlreadyLiked = `
         SELECT * FROM likes WHERE user_id = ? AND article_id = ?`;
     db.get(queryToCheckIfAlreadyLiked, [userId, chosenArticleId], (err, like) => {
-        if (err) return errorPage(response, 500, "R003", err);
+        if (err) return errorPage(response, 500, "R012", err);
         if (like) return response.redirect(`/reader/blog/${chosenBlogId}/article/${chosenArticleId}`);
 
         let queryToInsertLike = `
             INSERT INTO likes (user_id, article_id)
             VALUES (?, ?)`;
         db.run(queryToInsertLike, [userId, chosenArticleId], (err) => {
-            if (err) return errorPage(response, 500, "R004", err);
+            if (err) return errorPage(response, 500, "R013", err);
 
             let queryToUpdateArticleLikes = `
                 UPDATE articles SET likes = likes + 1 WHERE id = ?`;
             db.run(queryToUpdateArticleLikes, [chosenArticleId], (err) => {
-                if (err) return errorPage(response, 500, "R005", err);
+                if (err) return errorPage(response, 500, "R014", err);
                 response.redirect(`/reader/blog/${chosenBlogId}/article/${chosenArticleId}`);
             });
         });
     });
 });
 
-router.post("/blog/:chosenBlogId/article/:chosenArticleId/unlike", if_UserLoggedIn, (request, response) => {
+router.post("/blog/:chosenBlogId/article/:chosenArticleId/unlike", ensure_UserLoggedIn, (request, response) => {
     let chosenBlogId = request.params.chosenBlogId;
     let chosenArticleId = request.params.chosenArticleId;
     let userId = request.session.user.id;
@@ -234,12 +248,12 @@ router.post("/blog/:chosenBlogId/article/:chosenArticleId/unlike", if_UserLogged
     let queryToDeleteLike = `
         DELETE FROM likes WHERE user_id = ? AND article_id = ?`;
     db.run(queryToDeleteLike, [userId, chosenArticleId], (err) => {
-        if (err) return errorPage(response, 500, "R007", err);
+        if (err) return errorPage(response, 500, "R015", err);
 
         let queryToUpdateArticleLikes = `
             UPDATE articles SET likes = likes - 1 WHERE id = ?`;
         db.run(queryToUpdateArticleLikes, [chosenArticleId], (err) => {
-            if (err) return errorPage(response, 500, "R008", err);
+            if (err) return errorPage(response, 500, "R016", err);
             response.redirect(`/reader/blog/${chosenBlogId}/article/${chosenArticleId}`);
         });
     });

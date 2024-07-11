@@ -143,15 +143,11 @@
 
                 <%if (pageName == "Create new article") { %>
                 <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Save to draft</button>
-                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
+                <button class="btn btn-primary publish-button" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
                 <a href="/author"><button class="btn btn-warning" type="button">Cancel</button></a>
                 <%} else if (pageName == "Edit draft article") { %>
                 <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Update draft</button>
-                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
-                <a href="/author"><button class="btn btn-warning" type="button">Cancel</button></a>
-                <%} else if (pageName == "Edit published article") { %>
-                <button class="btn btn-alert" type="submit" name="thisReturnsItsValue" value="draft">Save to draft</button>
-                <button class="btn btn-primary" type="submit" name="thisReturnsItsValue" value="published">Update publish</button>
+                <button class="btn btn-primary publish-button" type="submit" name="thisReturnsItsValue" value="published">Publish</button>
                 <a href="/author"><button class="btn btn-warning" type="button">Cancel</button></a>
                 <%} %>
             </form>
@@ -171,6 +167,15 @@
                 let textInputDiv = document.getElementById("text-input");
                 let hiddenArticleBodyInput = document.getElementById("hiddenArticleBody");
                 hiddenArticleBodyInput.value = textInputDiv.innerHTML;
+            });
+            // Popup for confirmation
+            document.querySelectorAll(".publish-button").forEach((button) => {
+                button.addEventListener("click", (event) => {
+                    let confirmation = confirm("Are you sure you want to publish this article?");
+                    if (!confirmation) {
+                        event.preventDefault();
+                    }
+                });
             });
         </script>
     </body>

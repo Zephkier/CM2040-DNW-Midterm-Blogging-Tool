@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="/main.css" />
+        <title><%= pageName + tabNameSeparator + appName %></title>
+    </head>
+    <body>
+        <header><%- include("./partials/header-nav.ejs") %></header>
+
+        <main>
+            <%if (!user) { %>
+            <h1>Welcome to <%= appName %>!</h1>
+            <form method="POST" action="/login" class="form-width-25">
+                <div class="form-input-area">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text" value="<%= formInputStored.username %>" />
+                    <%formErrors.forEach((error) => { if (error.path == 'username') { %>
+                    <p class="error-message"><%= error.msg %></p>
+                    <%}}) %>
+                </div>
+                <div class="form-input-area">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="text" value="<%= formInputStored.password %>" />
+                    <%formErrors.forEach((error) => { if (error.path == 'password') { %>
+                    <p class="error-message"><%= error.msg %></p>
+                    <%}}) %>
+                </div>
+                <div class="form-input-area">
+                    <input class="btn btn-long btn-primary" type="submit" value="Login" />
+                    <% if (loginError) { %>
+                    <p class="error-message"><%= loginError %></p>
+                    <% } %>
+                </div>
+            </form>
+            <p>Don't have an account? <a href="/sign-up">Sign up</a> or <a href="/reader/blog">view as guest</a>.</p>
+            <%} else { %>
+            <div class="h1-and-friends-baseline friend-gap">
+                <h1>Welcome,</h1>
+                <h1 class="friend-display-name"><%= user.display_name %></h1>
+                <h1 class="friend-exclamation-mark">!</h1>
+            </div>
+            <p class="friend-column-no-gap-above">You may now access the navigation bar above.</p>
+            <%} %>
+        </main>
+
+        <footer><%- include("./partials/footer.ejs") %></footer>
+    </body>
+</html>

@@ -9,7 +9,8 @@ const db = new sqlite3.Database(`${dbFile}`, function (err) {
         process.exit(1);
     } else {
         console.log(`Database at '${dbFile}' connected`);
-        db.run("PRAGMA foreign_keys=ON"); // Tells SQLite to note foreign key constraints
+        // Tells SQLite to note foreign key constraints
+        db.run("PRAGMA foreign_keys=ON");
     }
 });
 
