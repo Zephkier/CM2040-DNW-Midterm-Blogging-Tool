@@ -24,7 +24,7 @@
                 </div>
                 <div class="form-input-area">
                     <label for="createPass">Create password</label>
-                    <input id="createPass" name="createPass" type="text" value="<%= formInputStored.createPass %>" />
+                    <input id="createPass" name="createPass" type="password" value="<%= formInputStored.createPass %>" />
                     <%formErrors.forEach((error) => { if (error.path == 'createPass') { %>
                     <p class="error-message"><%= error.msg %></p>
                     <%}}) %>

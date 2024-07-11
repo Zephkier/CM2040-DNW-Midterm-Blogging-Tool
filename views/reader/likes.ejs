@@ -14,18 +14,18 @@
                 <div class="h1-and-friends-center absolute">
                     <a href="/reader">Blogs</a>
                     <p>&nbsp;&nbsp;/&nbsp;&nbsp;</p>
-                    <a href="/reader/blog/<%= blogAndUser.id %>">Articles</a>
+                    <a href="/reader/blog/<%= blog.id %>">Articles</a>
                     <p>&nbsp;&nbsp;/&nbsp;&nbsp;</p>
-                    <a href="/reader/blog/<%= blogAndUser.id %>/article/<%= articleId %>" class="move-right-even-more">Read article</a>
+                    <a href="/reader/blog/<%= blog.id %>/article/<%= articleId %>" class="move-right-even-more">Read article</a>
                 </div>
                 <div class="reader-title-itself">
-                    <h1><%= blogAndUser.title %></h1>
-                    <p>by <%= blogAndUser.display_name %></p>
+                    <h1><%= blog.title %></h1>
+                    <p>by <%= blog.display_name %></p>
                 </div>
             </div>
 
             <div class="reader-display-items all-width">
-                <h2>Users who liked this article:</h2>
+                <h2><%= likes.length %> <%= likes.length == 1 ? "user" : "users" %> liked this article</h2>
                 <%likes.forEach(like => { %>
                 <div class="like-item">
                     <p><%= like.display_name %> @ <%= like.date_created %></p>

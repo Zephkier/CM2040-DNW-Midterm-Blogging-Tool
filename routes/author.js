@@ -15,16 +15,32 @@ const {
 
 const router = express.Router();
 
-// Ensure user is logged in and has a blog to access these pages!
+// Ensure user is logged in and has a blog to access some of these pages!
 
-// Home (author), view all articles
+/**
+ * Home (author) page
+ *
+ * This is where user can view and manage all their articles.
+ * Buttons and implementation are below this function.
+ *
+ * User can:
+ * - Edit blog title and author name via settings.
+ * - Create new article and either draft or publish it directly.
+ */
 router.get("/", ensure_UserLoggedIn, ensure_UserHasABlog, (request, response) => {
+    /**
+     * Database interaction:
+     * Query for articles from the author's blog, ordered by the last modified date.
+     *
+     * Output:
+     * Array of `{}` with `keys` like `articles` table from database.
+     */
     let queryForArticlesFromBlog = `
             SELECT * FROM articles
             WHERE blog_id = ?
             ORDER BY date_modified DESC`;
     db.all(queryForArticlesFromBlog, [request.blogInfo.id], (err, articlesFromBlog) => {
-        if (err) return errorPage(response, 500, "A001", err);
+        if (err) return errorPage(response, 500, "A018", err);
         // Order is [draft], [published], [deleted]
         let allArticles = [[], [], []];
         articlesFromBlog.forEach((article) => {
@@ -49,33 +65,70 @@ router.get("/", ensure_UserLoggedIn, ensure_UserHasABlog, (request, response) =>
     });
 });
 
-// Action buttons not including "Edit" button at .get("/article")
+/**
+ * Action buttons (not including "Edit" button which is at .get("/article")).
+ *
+ * - For draft articles,     user can edit,   publish or delete.
+ * - For published articles, user can share   or delete.
+ * - For deleted articles,   user can recover or delete permanently.
+ *
+ * In event the article to delete permanently has likes and comments connected to it via FKs,
+ * Ensure to also delete all connections first.
+ *
+ * This prevents FK constraint errors.
+ */
 router.post("/", (request, response) => {
-    let queryToUpdateOrDelete = "";
-    if (request.body.thisReturnsItsValue == "delete-permanently") queryToUpdateOrDelete = "DELETE from articles WHERE id = ?";
-    else queryToUpdateOrDelete = `UPDATE articles SET category = '${request.body.thisReturnsItsValue}' WHERE id = ?`;
-    db.run(queryToUpdateOrDelete, [request.body.chosenId], (err) => {
-        if (err) return errorPage(response, 500, "A002", err);
-        return response.redirect("/author");
-    });
+    let chosenId = request.body.chosenId;
+    if (request.body.thisReturnsItsValue === "delete-permanently") {
+        db.run("BEGIN TRANSACTION", (err) => {
+            if (err) return errorPage(response, 500, "A001", err);
+            db.run("DELETE FROM comments WHERE article_id = ?", [chosenId], (err) => {
+                if (err) {
+                    db.run("ROLLBACK", () => {});
+                    return errorPage(response, 500, "A002", err);
+                }
+                db.run("DELETE FROM likes WHERE article_id = ?", [chosenId], (err) => {
+                    if (err) {
+                        db.run("ROLLBACK", () => {});
+                        return errorPage(response, 500, "A003", err);
+                    }
+                    db.run("DELETE FROM articles WHERE id = ?", [chosenId], (err) => {
+                        if (err) {
+                            db.run("ROLLBACK", () => {});
+                            return errorPage(response, 500, "A004", err);
+                        }
+                        db.run("COMMIT", (err) => {
+                            if (err) {
+                                db.run("ROLLBACK", () => {});
+                                return errorPage(response, 500, "A005", err);
+                            }
+                            return response.redirect("/author");
+                        });
+                    });
+                });
+            });
+        });
+    } else {
+        // Update article category (draft, published, deleted)
+        let queryToUpdateOrDelete = `UPDATE articles SET category = ? WHERE id = ?`;
+        db.run(queryToUpdateOrDelete, [request.body.thisReturnsItsValue, chosenId], (err) => {
+            if (err) return errorPage(response, 500, "A006", err);
+            return response.redirect("/author");
+        });
+    }
 });
 
-// Create blog (note that this uses HasNoBlog()!)
+/**
+ * Create blog page
+ *
+ * This is where (new) user can create a new blog. Only for users without one.
+ */
 router.get("/create-blog", ensure_UserLoggedIn, ensure_UserHasNoBlog, (request, response) => {
-    let queryForBlogInfo = `
-        SELECT blogs.id, blogs.title, users.display_name
-        FROM blogs JOIN users
-        ON blogs.user_id = users.id
-        WHERE users.id = ?`;
-    db.get(queryForBlogInfo, [request.session.user.id], (err, blogInfo) => {
-        if (err) return errorPage(response, 500, "A003", err);
-        if (blogInfo) return response.redirect("/author");
-        return response.render("author/create-blog.ejs", {
-            pageName: "Create a blog",
-            user: request.session.user,
-            formInputStored: {},
-            formErrors: [],
-        });
+    return response.render("author/create-blog.ejs", {
+        pageName: "Create a blog",
+        user: request.session.user,
+        formInputStored: {},
+        formErrors: [],
     });
 });
 
@@ -93,13 +146,17 @@ router.post("/create-blog", [check("createBlogTitle", "Title must have at least 
         let queryToCreateBlogTitle = "INSERT INTO blogs (title, user_id) VALUES (?, ?)";
         let params = [request.body.createBlogTitle, request.session.user.id];
         db.run(queryToCreateBlogTitle, params, (err) => {
-            if (err) return errorPage(response, 500, "A004", err);
+            if (err) return errorPage(response, 500, "A007", err);
             return response.redirect("/author");
         });
     }
 });
 
-// Settings
+/**
+ * Settings page
+ *
+ * This is where user can update their blog title and display name.
+ */
 router.get("/settings", ensure_UserLoggedIn, ensure_UserHasABlog, (request, response) => {
     return response.render("author/settings.ejs", {
         pageName: "Settings",
@@ -136,10 +193,10 @@ router.post(
             let queryToUpdateBlogTitle = "UPDATE blogs SET title = ? WHERE user_id = ?";
             let params = [request.body.blogTitle, request.session.user.id];
             db.run(queryToUpdateBlogTitle, params, (err) => {
-                if (err) return errorPage(response, 500, "A005", err);
+                if (err) return errorPage(response, 500, "A008", err);
                 let queryToUpdateDisplayName = "UPDATE users SET display_name = ? WHERE id = ?";
                 db.run(queryToUpdateDisplayName, [request.body.displayName, request.session.user.id], (err) => {
-                    if (err) return errorPage(response, 500, "A006", err);
+                    if (err) return errorPage(response, 500, "A009", err);
                     return response.redirect("/author");
                 });
             });
@@ -147,7 +204,14 @@ router.post(
     }
 );
 
-// Article, create new article by default
+/**
+ * Article page (default = new article)
+ *
+ * When creating new article, in which user can choose to:
+ * - Draft
+ * - Publish
+ * - Cancel and go back
+ */
 router.get("/article", ensure_UserLoggedIn, ensure_UserHasABlog, (request, response) => {
     return response.render("author/article.ejs", {
         pageName: "Create new article",
@@ -178,8 +242,8 @@ router.post(
             // Do this first to get blogs.id
             let queryForBlogId = "SELECT id FROM blogs WHERE user_id = ?";
             db.get(queryForBlogId, [request.session.user.id], (err, blogId) => {
-                if (err) return errorPage(response, 500, "A007", err);
-                if (!blogId) return errorPage(response, 400, "A008", new Error("Blog not found"));
+                if (err) return errorPage(response, 500, "A010", err);
+                if (!blogId) return errorPage(response, 400, "A011", new Error("Blog not found"));
                 // So that article can be inserted into the correct blog via blogs.id
                 let queryToInsertArticle = `
                 INSERT INTO
@@ -195,7 +259,7 @@ router.post(
                     blogId.id,
                 ];
                 db.run(queryToInsertArticle, params, (err) => {
-                    if (err) return errorPage(response, 500, "A009", err);
+                    if (err) return errorPage(response, 500, "A012", err);
                     return response.redirect("/author");
                 });
             });
@@ -203,12 +267,18 @@ router.post(
     }
 );
 
-// Article, edit draft/published article (:chosenId is retrieved upon clicking "Edit" button)
+/**
+ * Article page (edit articles)
+ *
+ * This is where user can edit draft articles.
+ *
+ * `:chosenId` is retrieved upon clicking "Edit" action button.
+ */
 router.get("/article/:chosenId", ensure_UserLoggedIn, ensure_UserHasABlog, ensure_ArticleBelongsToBlog, (request, response) => {
     let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
     let chosenId = request.params.chosenId; // Get param from URL
     db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
-        if (err) return errorPage(response, 500, "A010", err);
+        if (err) return errorPage(response, 500, "A013", err);
         response.render("author/article.ejs", {
             pageName: `Edit ${chosenArticle.category} article`, // Differentiate editing draft or published articles
             user: request.session.user,
@@ -237,7 +307,7 @@ router.post(
             let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
             let chosenId = request.params.chosenId; // Get param from URL
             db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
-                if (err) return errorPage(response, 500, "A011", err);
+                if (err) return errorPage(response, 500, "A014", err);
                 return response.render("author/article.ejs", {
                     pageName: `Edit ${chosenArticle.category} article`, // Differentiate editing draft or published articles
                     user: request.session.user,
@@ -254,8 +324,8 @@ router.post(
             // Do this first to get blogs.id
             let queryForBlogId = "SELECT id FROM blogs WHERE user_id = ?";
             db.get(queryForBlogId, [request.session.user.id], (err, blogId) => {
-                if (err) return errorPage(response, 500, "A012", err);
-                if (!blogId) return errorPage(response, 400, "A013", new Error("Blog not found"));
+                if (err) return errorPage(response, 500, "A015", err);
+                if (!blogId) return errorPage(response, 400, "A016", new Error("Blog not found"));
                 // So that article can be inserted into the correct blog via blogs.id
                 let queryToUpdateArticle = `
                     UPDATE articles
@@ -274,7 +344,7 @@ router.post(
                     request.params.chosenId,
                 ];
                 db.run(queryToUpdateArticle, params, (err) => {
-                    if (err) return errorPage(response, 500, "A014", err);
+                    if (err) return errorPage(response, 500, "A017", err);
                     return response.redirect("/author");
                 });
             });
@@ -282,7 +352,9 @@ router.post(
     }
 );
 
-// After every possible page above, do error-handling for invalid URLs
+/**
+ * After every possible page above, this handles invalid URLs after "/author" prefix
+ */
 router.get("/:everythingElse", (request, response) => {
     return response.redirect("/author");
 });

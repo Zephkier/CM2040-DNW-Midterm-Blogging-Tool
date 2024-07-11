@@ -15,14 +15,14 @@
             <form method="POST" action="/login" class="form-width-25">
                 <div class="form-input-area">
                     <label for="username">Username</label>
-                    <input id="username" name="username" type="text" value="<%= formInputStored.username %>" />
+                    <input id="username" name="username" type="username" value="<%= formInputStored.username %>" />
                     <%formErrors.forEach((error) => { if (error.path == 'username') { %>
                     <p class="error-message"><%= error.msg %></p>
                     <%}}) %>
                 </div>
                 <div class="form-input-area">
                     <label for="password">Password</label>
-                    <input id="password" name="password" type="text" value="<%= formInputStored.password %>" />
+                    <input id="password" name="password" type="password" value="<%= formInputStored.password %>" />
                     <%formErrors.forEach((error) => { if (error.path == 'password') { %>
                     <p class="error-message"><%= error.msg %></p>
                     <%}}) %>

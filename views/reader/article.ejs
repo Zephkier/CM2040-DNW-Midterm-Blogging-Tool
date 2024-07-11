@@ -14,11 +14,11 @@
                 <div class="h1-and-friends-center absolute">
                     <a href="/reader">Blogs</a>
                     <p>&nbsp;&nbsp;/&nbsp;&nbsp;</p>
-                    <a href="/reader/blog/<%= blogAndUser.id %>">Articles</a>
+                    <a href="/reader/blog/<%= blog.id %>">Articles</a>
                 </div>
                 <div class="reader-title-itself">
-                    <h1><%= blogAndUser.title %></h1>
-                    <p>by <%= blogAndUser.display_name %></p>
+                    <h1><%= blog.title %></h1>
+                    <p>by <%= blog.display_name %></p>
                 </div>
             </div>
 
@@ -31,23 +31,23 @@
                     <%if (!user) { %>
                     <a href="/login"><button id="like-button" class="btn-med btn-alert" type="submit">Login to like this article</button></a>
                     <%} else if (hasLiked) { %>
-                    <form method="POST" action="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>/unlike#like-button">
+                    <form method="POST" action="/reader/blog/<%= blog.id %>/article/<%= publishedArticle.id %>/unlike#like-button">
                         <button id="like-button" class="btn-med btn-warning" type="submit">Unlike</button>
                     </form>
                     <%} else { %>
-                    <form method="POST" action="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>/like#like-button">
+                    <form method="POST" action="/reader/blog/<%= blog.id %>/article/<%= publishedArticle.id %>/like#like-button">
                         <button id="like-button" class="btn-med btn-primary" type="submit">Like</button>
                     </form>
                     <%} %>
                     <div class="h1-and-friends-column reader-display-views-likes">
                         <p>Views: <%= publishedArticle.views %></p>
-                        <p><a href="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>/likes">Likes: <%= publishedArticle.likes %></a></p>
+                        <p><a href="/reader/blog/<%= blog.id %>/article/<%= publishedArticle.id %>/likes">Likes: <%= publishedArticle.likes %></a></p>
                     </div>
                 </div>
             </div>
 
             <hr />
-            <h2 id="comments-section" class="comments-header"><%= comments.length %> comments</h2>
+            <h2 id="comments-section" class="comments-header"><%= comments.length %> <%= comments.length == 1 ? "comment" : "comments" %></h2>
 
             <%if (!user) { %>
             <div class="form-width-25 form-input-area">
@@ -55,7 +55,7 @@
                 <a href="/login"><button class="btn-med btn-alert margin-top">Login to post comments</button></a>
             </div>
             <%} else { %>
-            <form class="form-width-25" method="POST" action="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>">
+            <form class="form-width-25" method="POST" action="/reader/blog/<%= blog.id %>/article/<%= publishedArticle.id %>">
                 <div class="form-input-area">
                     <input id="enterComment" name="enterComment" type="text" placeholder="Add a comment here" />
                     <input class="btn btn-primary margin-top" type="submit" value="Post comment" />

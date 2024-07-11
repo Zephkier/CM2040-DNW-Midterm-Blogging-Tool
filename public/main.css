@@ -1,29 +1,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
 :root {
-    --background: #1c1c1c;
     --background-light: #3c3c3c;
+    --background: #1c1c1c;
 
-    --text-dim: #999999;
     --text: #eeeeee;
+    --text-dim: #999999;
 
-    --primary-dim: #138d70;
-    --primary: #1dc8a0;
     --primary-light: #a3e7d7;
-    /* --secondary: #2a7fcf; */
-    /* --secondary-light: #abc8e4; */
-    /* --accent: #f0f0f0; */
+    --primary: #1dc8a0;
+    --primary-dim: #138d70;
 
-    /* --links: var(--primary); */
-    /* --links-hover: var(--primary-light); */
-
-    /* --enabled: #5b8afe; */
-    /* --disabled: #151c2f; */
-
-    --alert-dim: #a09e46;
     --alert: #eceb83;
-    --warning-dim: #a74d4d;
+    --alert-dim: #a09e46;
+
     --warning: #ff8080;
+    --warning-dim: #a74d4d;
 }
 
 /* General */

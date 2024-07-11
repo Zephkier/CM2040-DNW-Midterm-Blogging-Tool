@@ -1,66 +1,143 @@
-## Coursework Template
+# CM2040 DNW Midterm Submission
 
-### CM2040 Database Networks and the Web
+<b><i>Edit this `README.md` to explain any specific instructions for setting up or using your application that you want to bring to our attention:
 
-#### Installation requirements
-
--   NodeJS
-    -   follow the install instructions at https://nodejs.org/en/
-    -   we recommend using the latest LTS version
--   Sqlite3
-    -   follow the instructions at https://www.tutorialspoint.com/sqlite/sqlite_installation.htm
-    -   Note that the latest versions of the Mac OS and Linux come with SQLite pre-installed
-
-#### Using this template
-
-This template sets you off in the right direction for your coursework. To get started:
-
--   Run `npm install` from the project directory to install all the node packages.
-
--   Run `npm run build-db` to create the database on Mac or Linux
-    or run `npm run build-db-win` to create the database on Windows
-
--   Run `npm run start` to start serving the web app (Access via http://localhost:3000)
-
-Test the app by browsing to the following routes:
-
--   http://localhost:3000
--   http://localhost:3000/users/list-users
--   http://localhost:3000/users/add-user
-
-You can also run:
-`npm run clean-db` to delete the database on Mac or Linux before rebuilding it for a fresh start
-`npm run clean-db-win` to delete the database on Windows before rebuilding it for a fresh start
-
-Please also read the document `Working with this Template.pdf` for further guidance.
-
-##### Creating database tables
-
--   All database tables should created by modifying the `db_schema.sql`
--   This allows us to review and recreate your database simply by running `npm run build-db`
--   Do NOT create or alter database tables through other means
-
-#### Preparing for submission
-
-Make a copy of your project folder.
-In your copy, delete the following files and folders:
-
--   node_modules
--   .git (the hidden folder with your git repository)
--   database.db (your database)
-
-Make sure that your `package.json` file includes all of the dependencies for your project. NB. you need to use the `--save` tag each time you use npm to install a dependency
-
-Edit this README.md to explain any specific instructions for setting up or using your application that you want to bring to our attention:
-
--   remove the existing contents that we have provided
 -   include any settings that should be adjusted in configuration files
 -   include a list of the additional libraries you are using
 -   anything else we need to know in order to successfully run your app
 
-NB. we will ONLY run `npm install`, `npm run build-db`, and `npm run start` . We will NOT install additional packages to run your code and will NOT run additional build scripts. Be careful with any additional node dependencies that you use.
+We will only run `npm install`, `npm run build-db`, and `npm run start`.
+We will not install additional packages to run your code and will not run additional build scripts.</i></b>
 
-# Notes for whoever is marking
+## 1. Settings and Configuration
 
--   "user(s)" is replaced with "reader(s)"
--   ran `npm install striptags`
+None.
+
+## 2. Additional Libraries Used
+
+### 2.1. `package.json`
+
+Packages (and scripts) used during development. This is left untouched in `package.json`:
+
+```json
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-db": "cat db_schema.sql | sqlite3 database.db #build anew database from the sql file",
+    "clean-db": "rm database.db #remove the old database",
+    "build-db-win": "sqlite3 database.db < db_schema.sql",
+    "clean-db-win": "del database.db",
+    "start": "node index.js",
+    "devStart": "nodemon index.js",
+    "restart-db": "npm run clean-db-win && npm run build-db-win"
+},
+"dependencies": {
+    "ejs": "^3.1.8",
+    "express": "^4.18.2",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.1.0",
+    "sqlite3": "^5.1.2",
+    "striptags": "^3.2.0"
+},
+"engines": {
+    "npm": ">=8.0.0",
+    "node": ">=16.0.0"
+},
+"devDependencies": {
+    "nodemon": "^3.1.4"
+}
+```
+
+-   **nodemon** was used to help streamline the development process.
+    -   It auto-refreshes the server upon saving a `.js` file, which increased productivity.
+
+<br>
+
+-   **striptags** was used after implementing my rich text editor (RTE), which uses `HTML` to format the article's body text.
+    -   Due to the implementation of my **home (reader) page**, it displays a shortened article's body.
+    -   This caused `HTML` tags to be left unclosed, which disrupted the page's formatting.
+    -   Thus, **striptags** was needed to remove all `HTML` tags consistently for all articles to be displayed as intended.
+
+<br>
+
+-   **express-validator** was used to help with form validation as taught my by university lecturer.
+
+<br>
+
+-   **express-sesssion** was used to help implement user authentication and differentiate access across the app, based on user roles, such as author and reader.
+
+### 2.2. `package-lock.json`
+
+![alt text](<README terminal error.png>)
+
+Based on the provided `package-lock.json`, it has few vulnerabilities upon `npm i`.
+Also left untouched throughout development.
+
+## 3. Additional Notes
+
+### 3.1 Users and Accounts
+
+To gain better understanding:
+
+-   **Non-users:** only allowed to read articles; must create account for more features.
+-   **Users:** able to be author and/or reader.
+    -   Users may choose **not to** create a blog.
+    -   Users can read, comment on, and like articles.
+
+Only usernames and passwords are required.
+Passwords are naively stored as plain text in the database.
+
+You may create a new account, or login with a preset one:
+
+| Username | Password |
+| -------- | -------- |
+| admin    | admin    |
+| normal   | normal   |
+| admin    | admin    |
+| bee      | bee      |
+| shrek    | shrek    |
+
+### 3.2 Error Pages
+
+Due to time contraints, no proper error pages were implemented.
+
+Instead, a `response.send()` with a custom-created Crash ID (typically for invalid database queries) and error message is presented.
+
+Crash IDs reference:
+
+-   `IR001` correponds to an error within `index-router.js`
+-   `A001` correponds to an error within `author.js`
+-   `R001` correponds to an error within `reader.js`
+-   `M001` correponds to an error within `middleware.js`
+
+### 3.3 Overall Directory Structure
+
+    .
+    ├── node_modules/
+    │
+    ├── public/
+    │   ├── main.css
+    │   └── rich-text-editor.js
+    │
+    ├── routes/
+    │   ├── index-router.js
+    │   ├── author.js
+    │   └── reader.js
+    │
+    ├── utils/
+    │   ├── db.js
+    │   └── middleware.js
+    │
+    ├── views/
+    │   ├── partials/
+    │   │   └── 2x .ejs files (header-nav, footer)
+    │   │
+    │   ├── author/
+    │   │   └── 4x .ejs files (home, settings, create-blog, article)
+    │   │
+    │   ├── reader/
+    │   │   └── 4x .ejs files (home, blog, article, likes)
+    │   │
+    │   └── 3x .ejs files (index, login, sign-up)
+    │
+    ├── index.js
+    └── package.json and so on

@@ -31,20 +31,26 @@ app.use(
 );
 
 /**
- * Implementation
+ * Set default locals.variables, then call next() to proceed with rest of code file.
  */
-// Set default locals.variables, then call next() to proceed with rest of code file
 app.use((request, response, next) => {
     response.locals.appName = "Blogr";
     response.locals.tabNameSeparator = " | ";
     response.locals.pageName = "You forgot to set 'pageName' in this page's .ejs file!";
     next();
 });
-// Set endpoint's (browser URL) prefix with corresponding imported router
+
+/**
+ * Set endpoint's (browser URL) prefix with corresponding router.
+ *
+ * Within each router file, after every possible page,
+ * There is a form of error handling for invalid URLs such as `:everythingElse` you see here.
+ *
+ * This could happen due to user manipulating the URL.
+ */
 app.use("/", indexRouter);
 app.use("/author", authorRouter);
 app.use("/reader", readerRouter);
-// After every possible endpoint from above, handle endpoint manipulation
 app.get("/:everythingElse", (request, response) => {
     return response.redirect("/");
 });

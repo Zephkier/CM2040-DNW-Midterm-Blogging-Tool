@@ -77,7 +77,7 @@ router.post(
             // Ensure params are in same order as "?" above
             let params = [request.body.username, request.body.password];
             db.get(queryForExistingUser, params, (err, existingUser) => {
-                if (err) return errorPage(response, 500, "I001", err);
+                if (err) return errorPage(response, 500, "IR001", err);
                 if (!existingUser) {
                     return response.render("login.ejs", {
                         pageName: "Login",
@@ -141,7 +141,7 @@ router.post(
             // Ensure username is unique in database
             let queryForExistingUsername = "SELECT * FROM users WHERE username = ?";
             db.get(queryForExistingUsername, [request.body.createUser], (err, existingUsername) => {
-                if (err) return errorPage(response, 500, "I002", err);
+                if (err) return errorPage(response, 500, "IR002", err);
                 // If incoming username is not unique, then re-render page with errors
                 if (existingUsername) {
                     return response.render("sign-up.ejs", {
@@ -162,7 +162,7 @@ router.post(
                 // Ensure params are in same order as "?" above
                 let params = [request.body.createUser, request.body.createPass, request.body.createDisplayName];
                 db.run(queryToInsertNewUser, params, (err, newUser) => {
-                    if (err) return errorPage(response, 500, "I003", err);
+                    if (err) return errorPage(response, 500, "IR003", err);
                     request.session.user = newUser;
                     return response.redirect("/login");
                 });
@@ -176,6 +176,8 @@ router.get("/logout", (request, response) => {
     request.session.destroy();
     return response.redirect("/");
 });
+
+// Do not put handling of invalid URLs here! author.js and reader.js still needs to access endpoints!
 
 // Export module containing the following so external files can access it
 module.exports = router;

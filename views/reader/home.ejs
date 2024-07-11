@@ -13,16 +13,16 @@
             <div class="reader-title-container">
                 <div class="reader-title-itself">
                     <h1>Blogs</h1>
-                    <p>Here are all the blogs on our website!</p>
+                    <p>Here are all the available blogs to read!</p>
                 </div>
             </div>
 
             <div class="reader-display-container">
-                <%allBlogsAndUsers.forEach(blogAndUser => { %>
-                <a href="/reader/blog/<%= blogAndUser.id %>" class="reader-display-items no-underline">
-                    <h2><%= blogAndUser.title %></h2>
-                    <h3>by <%= blogAndUser.display_name %></h3>
-                    <p>Number of articles: <%= blogAndUser.article_count %></p>
+                <%blogs.forEach((blog, index) => { %>
+                <a href="/reader/blog/<%= blog.id %>" class="reader-display-items no-underline">
+                    <h2><%= blog.title %></h2>
+                    <h3>by <%= blog.display_name %></h3>
+                    <p>Number of articles: <%= publishedCountInBlog[index].article_count %></p>
                     <button class="btn-med btn-primary">View all articles</button>
                 </a>
                 <%}) %>

@@ -69,12 +69,17 @@ function ensure_UserLoggedIn(request, response, next) {
  */
 function ensure_UserHasABlog(request, response, next) {
     let queryForBlogInfo = `
-        SELECT blogs.id, blogs.title, blogs.user_id, users.display_name
-        FROM blogs JOIN users
+        SELECT
+            blogs.id,
+            blogs.title,
+            blogs.user_id,
+            users.display_name
+        FROM blogs
+        JOIN users
         ON blogs.user_id = users.id
         WHERE users.id = ?`;
     db.get(queryForBlogInfo, [request.session.user.id], (err, blogInfo) => {
-        if (err) return errorPage(response, 500, "A001", err);
+        if (err) return errorPage(response, 500, "M001", err);
         if (!blogInfo) return response.redirect("/author/create-blog");
         request.blogInfo = blogInfo;
         next();
@@ -97,7 +102,7 @@ function ensure_UserHasNoBlog(request, response, next) {
         ON blogs.user_id = users.id
         WHERE users.id = ?`;
     db.get(queryForBlogInfo, [request.session.user.id], (err, blogInfo) => {
-        if (err) return errorPage(response, 500, "A001", err);
+        if (err) return errorPage(response, 500, "M002", err);
         if (blogInfo) return response.redirect("/author");
         next();
     });
@@ -110,7 +115,7 @@ function ensure_UserHasNoBlog(request, response, next) {
  * Requires `request.blogInfo`. Thus, must call `ensure_UserHasABlog()` first.
  *
  * Creates `chosenArticle`, accessed via `request.chosenArticle`, which has:
- * - **all properties** within `articles` table
+ * - **All properties** within `articles` table.
  *
  * @returns Redirect to home (author) or call next().
  */
@@ -118,8 +123,7 @@ function ensure_ArticleBelongsToBlog(request, response, next) {
     let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
     let chosenId = request.params.chosenId; // Get param from URL
     db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
-        console.log(chosenArticle);
-        if (err) return errorPage(response, 500, "A014", err);
+        if (err) return errorPage(response, 500, "M003", err);
         if (
             // Format
             chosenArticle.blog_id != request.blogInfo.id ||
@@ -128,6 +132,198 @@ function ensure_ArticleBelongsToBlog(request, response, next) {
             return response.redirect("/author");
         request.chosenArticle = chosenArticle;
         next();
+    });
+}
+
+/**
+ * Get all blog (and user) info, ordered by the latest blog first.
+ *
+ * Database interaction:
+ * - Query for certain columns from `blogs` and `users` table from database.
+ * - Join `blogs.user_id` FK to `users.id` PK.
+ *
+ * Output:
+ * - Array of `{id, title, user_id, display_name}`.
+ * - Creates `blogInfo`, accessed via `request.blogInfo`, which has:
+ *      - `.id`
+ *      - `.title`
+ *      - `.user_id`
+ *      - `.display_name`
+ */
+function getAll_BlogInfo_LatestIdFirst(request, response, next) {
+    let queryForBlogInfo = `
+        SELECT
+            blogs.id,
+            blogs.title,
+            blogs.user_id,
+            users.display_name
+        FROM blogs
+        JOIN users
+        ON blogs.user_id = users.id
+        WHERE blogs.user_id = users.id
+        ORDER BY blogs.id DESC`;
+    db.all(queryForBlogInfo, (err, blogInfo) => {
+        if (err) return errorPage(response, 500, "M004", err);
+        if (!blogInfo) return errorPage(response, 500, "M005", err);
+        request.blogInfo = blogInfo;
+        next();
+    });
+}
+
+/**
+ * Get blog (and user) info based on `request.params.chosenBlogId`.
+ *
+ * Ensure `GET` router also uses the `:chosenBlogId` name.
+ *
+ * Has endpoint-handling feature if user tries to manipulate URL.
+ *
+ * Database interaction:
+ * - Query for certain columns from `blogs` and `users` table from database.
+ * - Join `blogs.user_id` FK to `users.id` PK.
+ *
+ * Output:
+ * - Creates `blogInfo`, accessed via `request.blogInfo`, which has:
+ *      - `.id`
+ *      - `.title`
+ *      - `.user_id`
+ *      - `.display_name`
+ */
+function get_BlogInfo_BasedOnParam_ChosenBlogId(request, response, next) {
+    let queryForBlogInfo = `
+        SELECT
+            blogs.id,
+            blogs.title,
+            blogs.user_id,
+            users.display_name
+        FROM blogs
+        JOIN users
+        ON blogs.user_id = users.id
+        WHERE blogs.id = ?`;
+    db.get(queryForBlogInfo, [request.params.chosenBlogId], (err, blogInfo) => {
+        if (err) return errorPage(response, 500, "M006", err);
+        if (!blogInfo) return response.redirect("/reader"); // Endpoint-handling feature
+        request.blogInfo = blogInfo;
+        next();
+    });
+}
+
+/**
+ * As ANYONE is able to access this endpoint (referring to router that this is being used in),
+ *
+ * there is a need to account for both logged-in and non-logged-in users,
+ *
+ * as well as endpoint (URL) manipulation.
+ *
+ * Database interaction:
+ * - Ensure only articles with articles.blog_id == blogs.id are accessible.
+ * - Ensure only published articles are accessible.
+ * - If blog belongs to you (articles.blog_id == blogs.id and blogs.user_id == users.id),
+ *   then all categories of articles are accessible.
+ *
+ * Output:
+ * - `{}` with `keys` exactly like 'articles' table from database.
+ */
+function get_PublishedArticles_BasedOnParams_ChosenBlogAndArticle(request, response, next) {
+    let chosenBlogId = request.params.chosenBlogId;
+    let chosenArticleId = request.params.chosenArticleId;
+    let userId = request.session.user ? request.session.user.id : null;
+
+    let queryForChosenPublishedArticle = null;
+    let params = null;
+    if (userId) {
+        // Must specify `articles.*` or else `articles.title` is overwritten by `blogs.title`
+        queryForChosenPublishedArticle = `
+            SELECT articles.* FROM articles JOIN blogs
+            ON articles.blog_id = blogs.id
+            WHERE
+                articles.blog_id = ?
+            AND
+                articles.id = ?
+            AND
+                (articles.category = 'published' OR blogs.user_id = ?)`;
+        params = [chosenBlogId, chosenArticleId, userId];
+    } else {
+        // Must specify `articles.*` or else `articles.title` is overwritten by `blogs.title`
+        queryForChosenPublishedArticle = `
+            SELECT articles.* FROM articles JOIN blogs
+            ON articles.blog_id = blogs.id
+            WHERE
+                articles.blog_id = ?
+            AND
+                articles.id = ?
+            AND
+                articles.category = 'published'`;
+        params = [chosenBlogId, chosenArticleId];
+    }
+    db.get(queryForChosenPublishedArticle, params, (err, publishedArticle) => {
+        if (err) return errorPage(response, 500, "M007", err);
+        if (!publishedArticle) return response.redirect("/reader/blog/:chosenBlogId");
+        // Convert datetimes
+        publishedArticle.date_created = returnLocalDatetime(publishedArticle.date_created);
+        publishedArticle.date_modified = returnLocalDatetime(publishedArticle.date_modified);
+        request.publishedArticle = publishedArticle;
+        next();
+    });
+}
+
+/**
+ * If used within a `GET` router, then ensure to call this function first to properly update view count.
+ *
+ * Database interaction:
+ * - Increase selected published article's view count by one when ANYONE accesses its full page (this page).
+ */
+function update_ViewCount(request, response, next) {
+    let queryToAddViewCount = "UPDATE articles SET views = views + 1 WHERE id = ?";
+    db.run(queryToAddViewCount, [request.params.chosenArticleId], (err) => {
+        if (err) return errorPage(response, 500, "M008", err);
+        next();
+    });
+}
+
+/**
+ * This adds 1 like. Inserting/Deleting `likes` must be accompanied by updating.
+ *
+ * Database interaction:
+ * - Insert into `likes` table from database.
+ * - Update `articles` table's `like` column.
+ *
+ * Output:
+ * - Redirects to same page with the updated like count.
+ */
+function insertUpdate_LikeCount(request, response, next) {
+    let chosenArticleId = request.params.chosenArticleId;
+    let queryToInsertLike = "INSERT INTO likes (user_id, article_id) VALUES (?, ?)";
+    db.run(queryToInsertLike, [request.session.user.id, chosenArticleId], (err) => {
+        if (err) return errorPage(response, 500, "M009", err);
+        let queryToUpdateArticleLikes = "UPDATE articles SET likes = likes + 1 WHERE id = ?";
+        db.run(queryToUpdateArticleLikes, [chosenArticleId], (err) => {
+            if (err) return errorPage(response, 500, "M010", err);
+            next();
+        });
+    });
+}
+
+/**
+ * This removes 1 like. Inserting/Deleting `likes` must be accompanied by updating.
+ *
+ * Database interaction:
+ * - Delete from `likes` table from database.
+ * - Update `articles` table's `like` column.
+ *
+ * Output:
+ * - Redirects to same page with the updated like count.
+ *
+ */
+function deleteUpdate_LikeCount(request, response, next) {
+    let chosenArticleId = request.params.chosenArticleId;
+    let queryToDeleteLike = "DELETE FROM likes WHERE user_id = ? AND article_id = ?";
+    db.run(queryToDeleteLike, [request.session.user.id, chosenArticleId], (err) => {
+        if (err) return errorPage(response, 500, "M011", err);
+        let queryToUpdateArticleLikes = "UPDATE articles SET likes = likes - 1 WHERE id = ?";
+        db.run(queryToUpdateArticleLikes, [chosenArticleId], (err) => {
+            if (err) return errorPage(response, 500, "M012", err);
+            next();
+        });
     });
 }
 
@@ -140,4 +336,10 @@ module.exports = {
     ensure_UserHasABlog,
     ensure_UserHasNoBlog,
     ensure_ArticleBelongsToBlog,
+    getAll_BlogInfo_LatestIdFirst,
+    get_BlogInfo_BasedOnParam_ChosenBlogId,
+    get_PublishedArticles_BasedOnParams_ChosenBlogAndArticle,
+    update_ViewCount,
+    insertUpdate_LikeCount,
+    deleteUpdate_LikeCount,
 };

@@ -15,19 +15,19 @@
                     <a href="/reader">Blogs</a>
                 </div>
                 <div class="reader-title-itself">
-                    <h1><%= blogAndUser.title %></h1>
-                    <p>by <%= blogAndUser.display_name %></p>
+                    <h1><%= blog.title %></h1>
+                    <p>by <%= blog.display_name %></p>
                 </div>
             </div>
 
             <div class="reader-display-container">
                 <%publishedArticles.forEach(publishedArticle => { %>
-                <a href="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>" class="reader-display-items no-underline">
+                <a href="/reader/blog/<%= blog.id %>/article/<%= publishedArticle.id %>" class="reader-display-items no-underline">
                     <h2><%= publishedArticle.title %></h2>
                     <h3><%= publishedArticle.subtitle %></h3>
                     <p><%= publishedArticle.date_modified %></p>
                     <p><%= publishedArticle.body_plain %></p>
-                    <button class="btn-med btn-primary">Read more</button>
+                    <button class="btn btn-primary">Read more</button>
                     <div class="h1-and-friends-column reader-display-views-likes">
                         <p>Views: <%= publishedArticle.views %></p>
                         <p>Likes: <%= publishedArticle.likes %></p>
