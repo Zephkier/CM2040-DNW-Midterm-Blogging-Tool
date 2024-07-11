@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="/main.css" />
+        <title><%= pageName + tabNameSeparator + appName %></title>
+    </head>
+    <body>
+        <header><%- include("../partials/header-nav.ejs") %></header>
+
+        <main>
+            <div class="reader-title-container-with-back-btn">
+                <a href="./"><button class="btn btn-primary">Back to article</button></a>
+                <div class="reader-title-itself">
+                    <h1><%= blogAndUser.title %></h1>
+                    <p>by <%= blogAndUser.display_name %></p>
+                </div>
+            </div>
+
+            <div class="reader-display-items all-width">
+                <h2>Users who liked this article:</h2>
+                <%likes.forEach(like => { %>
+                <div class="like-item">
+                    <p><%= like.display_name %> @ <%= like.date_created %></p>
+                </div>
+                <%}) %>
+            </div>
+        </main>
+
+        <footer><%- include("../partials/footer.ejs") %></footer>
+    </body>
+</html>

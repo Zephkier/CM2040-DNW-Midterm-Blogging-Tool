@@ -9,49 +9,65 @@
     <body>
         <header><%- include("../partials/header-nav.ejs") %></header>
 
-        <main class="main-read-article">
+        <main>
             <div class="reader-title-container-with-back-btn">
-                <a href="/reader/blog/1"><button class="btn btn-primary">Back to all articles</button> </a>
+                <a href="/reader/blog/<%= blogAndUser.id %>"><button class="btn btn-primary">Back to view all articles</button></a>
                 <div class="reader-title-itself">
-                    <h1><%= blogInfo.title %></h1>
-                    <p>by <%= blogInfo.display_name %></p>
+                    <h1><%= blogAndUser.title %></h1>
+                    <p>by <%= blogAndUser.display_name %></p>
                 </div>
             </div>
 
-            <div class="title-container-reader">
-                <h1><%= blogInfo.title %></h1>
-                <p>by <%= blogInfo.display_name %></p>
+            <div class="reader-display-items all-width">
+                <h2><%= publishedArticle.title %></h2>
+                <h3><%= publishedArticle.subtitle %></h3>
+                <p class="date-modified"><%= publishedArticle.date_modified %></p>
+                <p class="body"><%- publishedArticle.body %></p>
+                <div class="h1-and-friends-center friend-gap">
+                    <%if (!user) { %>
+                    <form method="POST" action="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>/like#like-button">
+                        <button id="like-button" class="btn-med btn-alert" type="submit">Login to like this article</button>
+                    </form>
+                    <%} else if (hasLiked) { %>
+                    <form method="POST" action="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>/unlike#like-button">
+                        <button id="like-button" class="btn-med btn-warning" type="submit">Unlike</button>
+                    </form>
+                    <%} else { %>
+                    <form method="POST" action="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>/like#like-button">
+                        <button id="like-button" class="btn-med btn-primary" type="submit">Like</button>
+                    </form>
+                    <%} %>
+                    <div class="h1-and-friends-column reader-display-views-likes">
+                        <p>Views: <%= publishedArticle.views %></p>
+                        <p><a href="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>/likes">Likes: <%= publishedArticle.likes %></a></p>
+                    </div>
+                </div>
             </div>
-
-            <%chosenArticle.forEach(article => { %>
-            <h2><%= article.title %></h2>
-            <h3><%= article.subtitle %></h3>
-            <p class="date-modified"><%= article.date_modified %></p>
-            <p class="body"><%- article.body %></p>
-            <%if (article.title != "No article chosen to read!") { %>
-            <div class="read-views-and-likes">
-                <p>Views: <%= article.views %></p>
-                <p>Likes: <%= article.likes %></p>
-            </div>
-            <%} %> <%}); %>
 
             <hr />
+            <h2 id="comments-section" class="comments-header"><%= comments.length %> comments</h2>
 
-            <div class="comments-section">
-                <h2>Comments</h2>
-                <div class="one-comment">
-                    <p>display_name (--primary) @ date_commented (--text-dim)</p>
-                    <p>comment message</p>
-                </div>
-            </div>
-
-            <form>
+            <form class="form-width-25" method="POST" action="/reader/blog/<%= blogAndUser.id %>/article/<%= publishedArticle.id %>">
                 <div class="form-input-area">
-                    <label for="enterComment">Enter comments:</label>
-                    <input id="enterComment" name="enterComment" type="text" placeholder="Enter comment" />
+                    <%if (!user) { %>
+                    <input disaled placeholder="Add a comment here" />
+                    <input class="btn btn-alert margin-top" type="submit" value="Login to post comment" />
+                    <%} else { %>
+                    <input id="enterComment" name="enterComment" type="text" placeholder="Add a comment here" />
+                    <input class="btn btn-primary margin-top" type="submit" value="Post comment" />
+                    <%}%>
                 </div>
-                <input type="submit" value="Post comment" />
             </form>
+
+            <%comments.forEach(comment => { %>
+            <div class="comment-container">
+                <div class="h1-and-friends-center friend-gap comment-name-date">
+                    <p class="friend-display-name"><%= comment.display_name %></p>
+                    <p class="text-dim">@ <%= comment.date_created %></p>
+                </div>
+                <p class="posted-comment"><%= comment.body %></p>
+            </div>
+            <%}) %>
         </main>
 
         <footer><%- include("../partials/footer.ejs") %></footer>

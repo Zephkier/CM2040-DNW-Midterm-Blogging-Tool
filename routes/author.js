@@ -93,7 +93,7 @@ router.post("/create-blog", [check("createBlogTitle", "Title must have at least 
         let queryToCreateBlogTitle = "INSERT INTO blogs (title, user_id) VALUES (?, ?)";
         let params = [request.body.createBlogTitle, request.session.user.id];
         db.run(queryToCreateBlogTitle, params, (err) => {
-            if (err) errorPage(response, 500, "A004", err);
+            if (err) return errorPage(response, 500, "A004", err);
             return response.redirect("/author");
         });
     }
@@ -136,10 +136,10 @@ router.post(
             let queryToUpdateBlogTitle = "UPDATE blogs SET title = ? WHERE user_id = ?";
             let params = [request.body.blogTitle, request.session.user.id];
             db.run(queryToUpdateBlogTitle, params, (err) => {
-                if (err) errorPage(response, 500, "A005", err);
+                if (err) return errorPage(response, 500, "A005", err);
                 let queryToUpdateDisplayName = "UPDATE users SET display_name = ? WHERE id = ?";
                 db.run(queryToUpdateDisplayName, [request.body.displayName, request.session.user.id], (err) => {
-                    if (err) errorPage(response, 500, "A006", err);
+                    if (err) return errorPage(response, 500, "A006", err);
                     return response.redirect("/author");
                 });
             });
@@ -195,7 +195,7 @@ router.post(
                     blogId.id,
                 ];
                 db.run(queryToInsertArticle, params, (err) => {
-                    if (err) errorPage(response, 500, "A009", err);
+                    if (err) return errorPage(response, 500, "A009", err);
                     return response.redirect("/author");
                 });
             });
@@ -274,7 +274,7 @@ router.post(
                     request.params.chosenId,
                 ];
                 db.run(queryToUpdateArticle, params, (err) => {
-                    if (err) errorPage(response, 500, "A014", err);
+                    if (err) return errorPage(response, 500, "A014", err);
                     return response.redirect("/author");
                 });
             });
