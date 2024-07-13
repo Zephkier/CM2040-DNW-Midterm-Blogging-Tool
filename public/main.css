@@ -163,6 +163,8 @@ footer * {
 }
 button,
 input[type="submit"] {
+    font-family: "Poppins", monospace, sans-serif;
+    font-weight: bold;
     color: var(--background);
     cursor: pointer;
     transition: 0.3s ease;
@@ -454,4 +456,24 @@ Thus, reset those upon selection */
 }
 .margin-top {
     margin: 1em 0 0 0;
+}
+
+.popup {
+    position: fixed;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -25%);
+    border: 0.25em solid var(--warning);
+    background-color: var(--warning-dim);
+    color: var(--text);
+    box-shadow: 0 0 2em 1em var(--background);
+    padding: 2em;
+    font-size: larger;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.popup.hidden {
+    display: none;
 }

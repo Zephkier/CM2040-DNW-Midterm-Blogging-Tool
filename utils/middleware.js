@@ -51,7 +51,7 @@ function returnShortenPlainText(stringWithTags) {
  * @returns Redirect to login or call next().
  */
 function ensure_UserLoggedIn(request, response, next) {
-    if (!request.session.user) return response.redirect("/login");
+    if (!request.session.user) return response.redirect("/login?error=not_logged_in");
     next();
 }
 
@@ -80,7 +80,7 @@ function ensure_UserHasABlog(request, response, next) {
         WHERE users.id = ?`;
     db.get(queryForBlogInfo, [request.session.user.id], (err, blogInfo) => {
         if (err) return errorPage(response, 500, "M001", err);
-        if (!blogInfo) return response.redirect("/author/create-blog");
+        if (!blogInfo) return response.redirect("/author/create-blog?error=no_blog");
         request.blogInfo = blogInfo;
         next();
     });
@@ -103,7 +103,7 @@ function ensure_UserHasNoBlog(request, response, next) {
         WHERE users.id = ?`;
     db.get(queryForBlogInfo, [request.session.user.id], (err, blogInfo) => {
         if (err) return errorPage(response, 500, "M002", err);
-        if (blogInfo) return response.redirect("/author");
+        if (blogInfo) return response.redirect("/author?error=already_have_a_blog");
         next();
     });
 }
@@ -124,13 +124,18 @@ function ensure_ArticleBelongsToBlog(request, response, next) {
     let chosenId = request.params.chosenId; // Get param from URL
     db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
         if (err) return errorPage(response, 500, "M003", err);
-        if (!chosenArticle || chosenArticle.blog_id != request.blogInfo.id) return response.redirect("/author");
+        if (!chosenArticle || chosenArticle.blog_id != request.blogInfo.id) return response.redirect("/author?error=article_inaccessible");
         request.chosenArticle = chosenArticle;
         next();
     });
 }
 
-// TEST
+/**
+ * - If article is draft, then proceed.
+ * - If article is published or deleted, then it cannot be accessed.
+ *
+ * @returns Redirect to home (author) or call next().
+ */
 function ensure_ArticleIsNot_PublishedOrDeleted(request, response, next) {
     let queryForChosenArticle = `
         SELECT * FROM articles
@@ -139,7 +144,7 @@ function ensure_ArticleIsNot_PublishedOrDeleted(request, response, next) {
     let chosenId = request.params.chosenId; // Get param from URL
     db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
         if (err) return errorPage(response, 500, "M013", err);
-        if (chosenArticle) return response.redirect("/author");
+        if (chosenArticle) return response.redirect("/author?error=article_not_draft");
         next();
     });
 }
@@ -210,7 +215,7 @@ function get_BlogInfo_BasedOnParam_ChosenBlogId(request, response, next) {
         WHERE blogs.id = ?`;
     db.get(queryForBlogInfo, [request.params.chosenBlogId], (err, blogInfo) => {
         if (err) return errorPage(response, 500, "M006", err);
-        if (!blogInfo) return response.redirect("/reader"); // Endpoint-handling feature
+        if (!blogInfo) return response.redirect("/reader?error=invalid_blog_article_id");
         request.blogInfo = blogInfo;
         next();
     });
@@ -224,9 +229,9 @@ function get_BlogInfo_BasedOnParam_ChosenBlogId(request, response, next) {
  * as well as endpoint (URL) manipulation.
  *
  * Database interaction:
- * - Ensure only articles with articles.blog_id == blogs.id are accessible.
+ * - Ensure only articles with `articles.blog_id == blogs.id` are accessible.
  * - Ensure only published articles are accessible.
- * - If blog belongs to you (articles.blog_id == blogs.id and blogs.user_id == users.id),
+ * - If blog belongs to you (`articles.blog_id == blogs.id` and `blogs.user_id == users.id`),
  *   then all categories of articles are accessible.
  *
  * Output:

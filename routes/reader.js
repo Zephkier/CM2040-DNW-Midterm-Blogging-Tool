@@ -212,6 +212,27 @@ router.post("/blog/:chosenBlogId/article/:chosenArticleId", ensure_UserLoggedIn,
 });
 
 /**
+ * Liking article, only logged in user can like.
+ */
+router.post("/blog/:chosenBlogId/article/:chosenArticleId/like", ensure_UserLoggedIn, insertUpdate_LikeCount, (request, response) => {
+    let chosenBlogId = request.params.chosenBlogId;
+    let chosenArticleId = request.params.chosenArticleId;
+    let queryToCheckIfAlreadyLiked = "SELECT * FROM likes WHERE user_id = ? AND article_id = ?";
+    db.get(queryToCheckIfAlreadyLiked, [request.session.user.id, chosenArticleId], (err, like) => {
+        if (err) return errorPage(response, 500, "R007", err);
+        if (like) return response.redirect(`/reader/blog/${chosenBlogId}/article/${chosenArticleId}`);
+        response.redirect(`/reader/blog/${chosenBlogId}/article/${chosenArticleId}`);
+    });
+});
+
+/**
+ * Unliking article, only logged in user can unlike.
+ */
+router.post("/blog/:chosenBlogId/article/:chosenArticleId/unlike", ensure_UserLoggedIn, deleteUpdate_LikeCount, (request, response) => {
+    response.redirect(`/reader/blog/${request.params.chosenBlogId}/article/${request.params.chosenArticleId}`);
+});
+
+/**
  * Article's 'like' page
  *
  * This is where user can see who liked a specific article with the latest displayed first.
@@ -243,27 +264,6 @@ router.get("/blog/:chosenBlogId/article/:chosenArticleId/likes", get_BlogInfo_Ba
             articleId: request.params.chosenArticleId,
         });
     });
-});
-
-/**
- * Liking article, only logged in user can like.
- */
-router.post("/blog/:chosenBlogId/article/:chosenArticleId/like", ensure_UserLoggedIn, insertUpdate_LikeCount, (request, response) => {
-    let chosenBlogId = request.params.chosenBlogId;
-    let chosenArticleId = request.params.chosenArticleId;
-    let queryToCheckIfAlreadyLiked = "SELECT * FROM likes WHERE user_id = ? AND article_id = ?";
-    db.get(queryToCheckIfAlreadyLiked, [request.session.user.id, chosenArticleId], (err, like) => {
-        if (err) return errorPage(response, 500, "R007", err);
-        if (like) return response.redirect(`/reader/blog/${chosenBlogId}/article/${chosenArticleId}`);
-        response.redirect(`/reader/blog/${chosenBlogId}/article/${chosenArticleId}`);
-    });
-});
-
-/**
- * Unliking article, only logged in user can like.
- */
-router.post("/blog/:chosenBlogId/article/:chosenArticleId/unlike", ensure_UserLoggedIn, deleteUpdate_LikeCount, (request, response) => {
-    response.redirect(`/reader/blog/${request.params.chosenBlogId}/article/${request.params.chosenArticleId}`);
 });
 
 /**

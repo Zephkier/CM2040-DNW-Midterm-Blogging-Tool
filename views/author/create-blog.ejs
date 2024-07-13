@@ -23,8 +23,15 @@
                 </div>
                 <input class="btn btn-primary" type="submit" value="Create blog" />
             </form>
+
+            <div id="popup" class="popup hidden">
+                <p id="popup-message"></p>
+                <button id="popup-close" class="btn-med btn-alert">Close</button>
+            </div>
         </main>
 
         <footer><%- include("../partials/footer.ejs") %></footer>
+
+        <script src="/error-popup-box.js"></script>
     </body>
 </html>

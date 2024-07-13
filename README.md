@@ -78,10 +78,10 @@ Also left untouched throughout development.
 
 To gain better understanding:
 
--   **Non-users:** only allowed to read articles; must create account for more features.
--   **Users:** able to be author and/or reader.
-    -   Users may choose **not to** create a blog.
-    -   Users can read, comment on, and like articles.
+-   **Non-users:** able to read articles only; must create an account for more features.
+-   **Users:** able to be reader and/or author.
+    -   **Reader:** able to read, comment on, and like articles.
+    -   **Author:** may choose to create a blog to write articles.
 
 Only usernames and passwords are required.
 Passwords are naively stored as plain text in the database.
