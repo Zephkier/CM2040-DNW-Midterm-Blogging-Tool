@@ -51,7 +51,7 @@ app.use((request, response, next) => {
 app.use("/", indexRouter);
 app.use("/author", authorRouter);
 app.use("/reader", readerRouter);
-app.get("/:everythingElse", (request, response) => {
+app.get("/*", (request, response) => {
     return response.redirect("/");
 });
 // Start server

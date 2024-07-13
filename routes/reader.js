@@ -267,9 +267,16 @@ router.post("/blog/:chosenBlogId/article/:chosenArticleId/unlike", ensure_UserLo
 });
 
 /**
+ * After every possible page above, this handles invalid URLs after "/reader/blog/:id/article/:id" prefix
+ */
+router.get("/blog/:id/article/:id/*", (request, response) => {
+    return response.redirect("/reader");
+});
+
+/**
  * After every possible page above, this handles invalid URLs after "/reader" prefix
  */
-router.get("/:everythingElse", (request, response) => {
+router.get("/*", (request, response) => {
     return response.redirect("/reader");
 });
 

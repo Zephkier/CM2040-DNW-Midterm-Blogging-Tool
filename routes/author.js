@@ -11,6 +11,7 @@ const {
     ensure_UserHasABlog,
     ensure_UserHasNoBlog,
     ensure_ArticleBelongsToBlog,
+    ensure_ArticleIsNot_PublishedOrDeleted,
 } = require("../utils/middleware.js");
 
 const router = express.Router();
@@ -274,24 +275,33 @@ router.post(
  *
  * `:chosenId` is retrieved upon clicking "Edit" action button.
  */
-router.get("/article/:chosenId", ensure_UserLoggedIn, ensure_UserHasABlog, ensure_ArticleBelongsToBlog, (request, response) => {
-    let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
-    let chosenId = request.params.chosenId; // Get param from URL
-    db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
-        if (err) return errorPage(response, 500, "A013", err);
-        response.render("author/article.ejs", {
-            pageName: `Edit ${chosenArticle.category} article`, // Differentiate editing draft or published articles
-            user: request.session.user,
-            formInputStored: {
-                chosenId: chosenId,
-                articleTitle: chosenArticle.title,
-                articleSubtitle: chosenArticle.subtitle,
-                articleBody: chosenArticle.body,
-            },
-            formErrors: [],
+router.get(
+    "/article/:chosenId",
+    // Format
+    ensure_UserLoggedIn,
+    ensure_UserHasABlog,
+    ensure_ArticleBelongsToBlog,
+    ensure_ArticleIsNot_PublishedOrDeleted,
+    (request, response) => {
+        let queryForChosenArticle = "SELECT * FROM articles WHERE id = ?";
+        let chosenId = request.params.chosenId; // Get param from URL
+        db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
+            if (err) return errorPage(response, 500, "A013", err);
+            if (!chosenArticle) return response.redirect("/author");
+            response.render("author/article.ejs", {
+                pageName: `Edit ${chosenArticle.category} article`, // Differentiate editing draft or published articles
+                user: request.session.user,
+                formInputStored: {
+                    chosenId: chosenId,
+                    articleTitle: chosenArticle.title,
+                    articleSubtitle: chosenArticle.subtitle,
+                    articleBody: chosenArticle.body,
+                },
+                formErrors: [],
+            });
         });
-    });
-});
+    }
+);
 
 router.post(
     "/article/:chosenId",
@@ -355,7 +365,7 @@ router.post(
 /**
  * After every possible page above, this handles invalid URLs after "/author" prefix
  */
-router.get("/:everythingElse", (request, response) => {
+router.get("/*", (request, response) => {
     return response.redirect("/author");
 });
 

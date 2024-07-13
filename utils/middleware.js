@@ -124,13 +124,22 @@ function ensure_ArticleBelongsToBlog(request, response, next) {
     let chosenId = request.params.chosenId; // Get param from URL
     db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
         if (err) return errorPage(response, 500, "M003", err);
-        if (
-            // Format
-            chosenArticle.blog_id != request.blogInfo.id ||
-            !chosenArticle
-        )
-            return response.redirect("/author");
+        if (!chosenArticle || chosenArticle.blog_id != request.blogInfo.id) return response.redirect("/author");
         request.chosenArticle = chosenArticle;
+        next();
+    });
+}
+
+// TEST
+function ensure_ArticleIsNot_PublishedOrDeleted(request, response, next) {
+    let queryForChosenArticle = `
+        SELECT * FROM articles
+        WHERE id = ?
+        AND (category = 'published' OR category = 'deleted')`;
+    let chosenId = request.params.chosenId; // Get param from URL
+    db.get(queryForChosenArticle, [chosenId], (err, chosenArticle) => {
+        if (err) return errorPage(response, 500, "M013", err);
+        if (chosenArticle) return response.redirect("/author");
         next();
     });
 }
@@ -336,6 +345,7 @@ module.exports = {
     ensure_UserHasABlog,
     ensure_UserHasNoBlog,
     ensure_ArticleBelongsToBlog,
+    ensure_ArticleIsNot_PublishedOrDeleted,
     getAll_BlogInfo_LatestIdFirst,
     get_BlogInfo_BasedOnParam_ChosenBlogId,
     get_PublishedArticles_BasedOnParams_ChosenBlogAndArticle,
