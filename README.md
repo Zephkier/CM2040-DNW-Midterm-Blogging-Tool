@@ -8,9 +8,9 @@ This was created in Year 2, Semester 2, of my university's CM2040 Databases, Net
 
 # Getting Started
 
-In the terminal, navigate to this directory and run the following commands:
+Open the terminal to this directory and execute the following commands to setup and run the web application:
 
-![alt text](image.png)
+![Screenshot of terminal accessing this directory](https://github.com/user-attachments/assets/33c5e73c-a649-45ec-bd8c-0a4bfbcfbb41)
 
 Install the necessary Node dependencies as per `package.json`:
 
@@ -52,7 +52,7 @@ You may create a new account, or login with the following presets:
 
 [YouTube video](https://youtu.be/InhYQZXPpzE) for explanation and demonstration:
 
-[![Screenshot of YouTube video](image-1.png)](https://youtu.be/InhYQZXPpzE)
+[![Screenshot of YouTube video](https://github.com/user-attachments/assets/72b95676-63ed-44e4-b7e6-81708fb57a87)](https://youtu.be/InhYQZXPpzE)
 
 Author's home page:
 
